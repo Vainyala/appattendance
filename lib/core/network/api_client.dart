@@ -24,6 +24,40 @@ final dioProvider = Provider<Dio>((ref) {
 
   return dio;
 });
+
+// lib/core/network/api_client.dart
+
+class AuthInterceptor extends Interceptor {
+  final Ref ref;
+
+  AuthInterceptor(this.ref);
+
+  @override
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    // Token ab notifier se alag se milega
+    final authNotifier = ref.read(authProvider.notifier);
+    final token = authNotifier.token;
+
+    if (token != null) {
+      options.headers['Authorization'] = 'Bearer $token';
+    }
+
+    handler.next(options);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    if (err.response?.statusCode == 401) {
+      ref.read(authProvider.notifier).logout();
+      // Optional: Navigate to login
+    }
+    handler.next(err);
+  }
+}
+
 // final dioProvider = Provider<Dio>((ref) {
 //   final dio = Dio(
 //     BaseOptions(
@@ -47,36 +81,36 @@ final dioProvider = Provider<Dio>((ref) {
 //   return dio;
 // });
 
-class AuthInterceptor extends Interceptor {
-  final Ref ref;
+// class AuthInterceptor extends Interceptor {
+//   final Ref ref;
 
-  AuthInterceptor(this.ref);
-  @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
-  ) async {
-    // SAHI TARIKA JAB AsyncNotifier USE KAR RAHE HO
-    final authState = ref.read(authProvider);
+//   AuthInterceptor(this.ref);
+//   @override
+//   void onRequest(
+//     RequestOptions options,
+//     RequestInterceptorHandler handler,
+//   ) async {
+//     // SAHI TARIKA JAB AsyncNotifier USE KAR RAHE HO
+//     final authState = ref.read(authProvider);
 
-    // authState AsyncValue hai → .value se UserModel? niklega
-    final user = authState.value; // ← YEHI LINE CHANGE KI HAI!
+//     // authState AsyncValue hai → .value se UserModel? niklega
+//     final user = authState.value; // ← YEHI LINE CHANGE KI HAI!
 
-    if (user?.token != null) {
-      options.headers['Authorization'] = 'Bearer ${user!.token}';
-    }
+//     if (user?.token != null) {
+//       options.headers['Authorization'] = 'Bearer ${user!.token}';
+//     }
 
-    handler.next(options);
-  }
+//     handler.next(options);
+//   }
 
-  @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
-    if (err.response?.statusCode == 401) {
-      ref.read(authProvider.notifier).logout();
-    }
-    handler.next(err);
-  }
-}
+//   @override
+//   void onError(DioException err, ErrorInterceptorHandler handler) {
+//     if (err.response?.statusCode == 401) {
+//       ref.read(authProvider.notifier).logout();
+//     }
+//     handler.next(err);
+//   }
+// }
 
 //   @override
 //   void onRequest(
