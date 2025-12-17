@@ -1,0 +1,242 @@
+{
+  "user": [
+    {
+      "emp_id": "EMP001",
+      "email_id": "samal@nutantek.com",
+      "password": "pass123",
+      "mpin": "1234",
+      "otp": null,
+      "otp_expiry_time": null,
+      "emp_status": "active",
+      "created_at": "2025-12-16T10:00:00Z",
+      "updated_at": "2025-12-16T10:00:00Z"
+    },
+    {
+      "emp_id": "EMP002",
+      "email_id": "raj@nutantek.com",
+      "password": "manager123",
+      "mpin": "5678",
+      "otp": null,
+      "otp_expiry_time": null,
+      "emp_status": "active",
+      "created_at": "2025-12-16T10:00:00Z",
+      "updated_at": "2025-12-16T10:00:00Z"
+    }
+  ],
+
+  "organization_master": [
+    {
+      "org_id": "ORG001",
+      "org_name": "Nutantek Solutions",
+      "org_email": "info@nutantek.com",
+      "created_at": "2025-01-01T00:00:00Z",
+      "updated_at": "2025-12-16T00:00:00Z"
+    }
+  ],
+
+  "employee_master": [
+    {
+      "emp_id": "EMP001",
+      "org_id": "ORG001",
+      "emp_name": "Vainyala Samal",
+      "emp_email": "samal@nutantek.com",
+      "emp_role": "Employee",
+      "emp_department": "Mobile Development",
+      "emp_phone": "9876543210",
+      "check_in_out_status": "checked_in",
+      "created_at": "2025-12-16T10:00:00Z",
+      "updated_at": "2025-12-16T10:00:00Z"
+    },
+    {
+      "emp_id": "EMP002",
+      "org_id": "ORG001",
+      "emp_name": "Raj Sharma",
+      "emp_email": "raj@nutantek.com",
+      "emp_role": "Manager",
+      "emp_department": "Management",
+      "emp_phone": "9123456780",
+      "check_in_out_status": "checked_in",
+      "created_at": "2025-12-16T10:00:00Z",
+      "updated_at": "2025-12-16T10:00:00Z"
+    }
+  ],
+
+  "project_master": [
+    {
+      "project_id": "P001",
+      "project_name": "Nutantek Office App",
+      "project_site": "Nutantek Head Office",
+      "client_name": "Nutantek Internal",
+      "client_location": "Bhubaneswar",
+      "client_contact": "7894561230",
+      "project_site_lat": "20.2961",
+      "project_site_long": "85.8245",
+      "mng_name": "Raj Sharma",
+      "mng_email": "raj@nutantek.com",
+      "mng_contact": "9123456780",
+      "project_description": "Internal attendance and HR management app",
+      "project_techstack": "Flutter, Node.js, MariaDB",
+      "project_assigned_date": "2025-11-01",
+      "created_at": "2025-11-01T00:00:00Z",
+      "updated_at": "2025-12-16T00:00:00Z"
+    },
+    {
+      "project_id": "P002",
+      "project_name": "E-Commerce Platform",
+      "project_site": "Client Site - Delhi",
+      "client_name": "ABC Corp",
+      "client_location": "New Delhi",
+      "client_contact": "9998887776",
+      "project_site_lat": "28.7041",
+      "project_site_long": "77.1025",
+      "mng_name": "Raj Sharma",
+      "mng_email": "raj@nutantek.com",
+      "mng_contact": "9123456780",
+      "project_description": "Full-stack e-commerce solution for retail",
+      "project_techstack": "React, Node.js, MongoDB",
+      "project_assigned_date": "2025-10-15",
+      "created_at": "2025-10-15T00:00:00Z",
+      "updated_at": "2025-12-16T00:00:00Z"
+    }
+  ],
+
+  "employee_attendance": [
+    {
+      "att_id": "ATT001",
+      "emp_id": "EMP001",
+      "att_date": "2025-12-16",
+      "att_timestamp": "2025-12-16T09:15:00Z",
+      "att_latitude": 20.2961,
+      "att_longitude": 85.8245,
+      "att_geofence_name": "nutantekoffice",
+      "att_project_id": "P001",
+      "att_notes": "On time",
+      "att_status": "checkin",
+      "verification_type": "face",
+      "is_verified": 1,
+      "created_at": "2025-12-16T09:15:00Z",
+      "updated_at": "2025-12-16T09:15:00Z"
+    },
+    {
+      "att_id": "ATT002",
+      "emp_id": "EMP001",
+      "att_date": "2025-12-15",
+      "att_timestamp": "2025-12-15T09:45:00Z",
+      "att_latitude": 20.2961,
+      "att_longitude": 85.8245,
+      "att_geofence_name": "nutantekoffice",
+      "att_project_id": "P001",
+      "att_notes": "Late due to traffic",
+      "att_status": "checkin",
+      "verification_type": "face",
+      "is_verified": 1,
+      "created_at": "2025-12-15T09:45:00Z",
+      "updated_at": "2025-12-15T09:45:00Z"
+    },
+    {
+      "att_id": "ATT003",
+      "emp_id": "EMP002",
+      "att_date": "2025-12-16",
+      "att_timestamp": "2025-12-16T08:50:00Z",
+      "att_latitude": 20.2961,
+      "att_longitude": 85.8245,
+      "att_geofence_name": "nutantekoffice",
+      "att_project_id": "P001",
+      "att_notes": "Early arrival",
+      "att_status": "checkin",
+      "verification_type": "face",
+      "is_verified": 1,
+      "created_at": "2025-12-16T08:50:00Z",
+      "updated_at": "2025-12-16T08:50:00Z"
+    }
+  ],
+
+  "employee_regularization": [
+    {
+      "emp_id": "EMP001",
+      "reg_date_applied": "2025-12-10",
+      "reg_applied_for_date": "2025-12-08",
+      "reg_justification": "Was sick, forgot to apply leave",
+      "reg_approval_status": "pending",
+      "created_at": "2025-12-10T12:00:00Z",
+      "updated_at": "2025-12-10T12:00:00Z"
+    }
+  ],
+
+  "employee_leaves": [
+    {
+      "leave_id": "L001",
+      "emp_id": "EMP001",
+      "leave_from_date": "2025-12-25",
+      "leave_to_date": "2025-12-26",
+      "leave_type": "Casual Leave",
+      "leave_approval_status": "pending",
+      "leave_justification": "Family function",
+      "manager_comments": null
+    }
+  ],
+
+  "user_roles": [
+    {
+      "role_id": 1,
+      "role_name": "Employee"
+    },
+    {
+      "role_id": 2,
+      "role_name": "Manager"
+    },
+    {
+      "role_id": 3,
+      "role_name": "Admin"
+    }
+  ],
+
+  "employee_mapped_projects": [
+    {
+      "emp_id": "EMP001",
+      "project_id": "P001",
+      "mapping_status": "active"
+    },
+    {
+      "emp_id": "EMP001",
+      "project_id": "P002",
+      "mapping_status": "active"
+    },
+    {
+      "emp_id": "EMP002",
+      "project_id": "P001",
+      "mapping_status": "active"
+    }
+  ],
+
+  "employee_shifts": [
+    {
+      "emp_id": "EMP001",
+      "shift_id": "SHIFT001"
+    },
+    {
+      "emp_id": "EMP002",
+      "shift_id": "SHIFT001"
+    }
+  ],
+
+  "employee_roles_mapping": [
+    {
+      "emp_id": "EMP001",
+      "role_id": "1"
+    },
+    {
+      "emp_id": "EMP002",
+      "role_id": "2"
+    }
+  ],
+
+  "shift_master": [
+    {
+      "shift_id": "SHIFT001",
+      "shift_name": "Morning Shift",
+      "shift_start_time": "09:00",
+      "shift_end_time": "18:00"
+    }
+  ]
+}

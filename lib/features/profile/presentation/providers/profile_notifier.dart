@@ -33,7 +33,7 @@ class ProfileNotifier extends StateNotifier<AsyncValue<UserModel?>> {
     );
 
     // Save to DB
-    await DBHelper.instance.saveUser(updated.toJson());
+    await DBHelper.instance.saveCurrentUser(updated.toJson());
     ref.read(roleProvider.notifier).setUser(updated);
     state = AsyncData(updated);
   }
