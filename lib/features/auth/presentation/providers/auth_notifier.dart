@@ -39,6 +39,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
       state = AsyncData(user);
     } catch (e, stack) {
       state = AsyncError(e, stack);
+      // Optional: Snackbar ya toast show karo (widget se handle karna better)
     }
   }
 
@@ -52,6 +53,10 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
     } catch (e, stack) {
       state = AsyncError(e, stack);
     }
+  }
+
+  void updateUser(UserModel updated) {
+    state = AsyncData(updated);
   }
 }
 

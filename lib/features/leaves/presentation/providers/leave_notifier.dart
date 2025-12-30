@@ -1,12 +1,10 @@
-// lib/features/leave/presentation/providers/leave_notifier.dart
+// lib/features/leaves/presentation/providers/leave_notifier.dart
 import 'package:appattendance/features/auth/domain/models/user_model.dart';
 import 'package:appattendance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:appattendance/features/leaves/domain/models/leave_model.dart';
 import 'package:appattendance/features/leaves/presentation/providers/leave_provider.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Notifier for Employee's Own Leaves
 class MyLeavesNotifier extends StateNotifier<AsyncValue<List<LeaveModel>>> {
   final Ref ref;
 
@@ -31,23 +29,18 @@ class MyLeavesNotifier extends StateNotifier<AsyncValue<List<LeaveModel>>> {
     }
   }
 
-  Future<void> applyLeave(LeaveModel leave, BuildContext context) async {
+  Future<void> applyLeave(LeaveModel leave) async {
     try {
       final repo = ref.read(leaveRepositoryProvider);
       await repo.applyLeave(leave);
       await loadLeaves(); // Refresh list
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Leave applied successfully')),
-      );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error applying leave: $e')));
+      state = AsyncError(e, StackTrace.current);
     }
   }
 }
 
-// Notifier for Manager's Pending Leaves Count
+// Manager ke pending count ke liye alag notifier (dashboard ke liye)
 class PendingLeavesNotifier extends StateNotifier<AsyncValue<int>> {
   final Ref ref;
 
@@ -72,6 +65,81 @@ class PendingLeavesNotifier extends StateNotifier<AsyncValue<int>> {
     }
   }
 }
+
+// // lib/features/leave/presentation/providers/leave_notifier.dart
+// import 'package:appattendance/features/auth/domain/models/user_model.dart';
+// import 'package:appattendance/features/auth/presentation/providers/auth_provider.dart';
+// import 'package:appattendance/features/leaves/domain/models/leave_model.dart';
+// import 'package:appattendance/features/leaves/presentation/providers/leave_provider.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// // Notifier for Employee's Own Leaves
+// class MyLeavesNotifier extends StateNotifier<AsyncValue<List<LeaveModel>>> {
+//   final Ref ref;
+
+//   MyLeavesNotifier(this.ref) : super(const AsyncLoading()) {
+//     loadLeaves();
+//   }
+
+//   Future<void> loadLeaves() async {
+//     state = const AsyncLoading();
+//     try {
+//       final user = ref.read(authProvider).value;
+//       if (user == null) {
+//         state = AsyncError('Not logged in', StackTrace.current);
+//         return;
+//       }
+
+//       final repo = ref.read(leaveRepositoryProvider);
+//       final leaves = await repo.getLeavesByEmployee(user.empId);
+//       state = AsyncData(leaves);
+//     } catch (e, stack) {
+//       state = AsyncError(e, stack);
+//     }
+//   }
+
+//   Future<void> applyLeave(LeaveModel leave, BuildContext context) async {
+//     try {
+//       final repo = ref.read(leaveRepositoryProvider);
+//       await repo.applyLeave(leave);
+//       await loadLeaves(); // Refresh list
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text('Leave applied successfully')),
+//       );
+//     } catch (e) {
+//       ScaffoldMessenger.of(
+//         context,
+//       ).showSnackBar(SnackBar(content: Text('Error applying leave: $e')));
+//     }
+//   }
+// }
+
+// // Notifier for Manager's Pending Leaves Count
+// class PendingLeavesNotifier extends StateNotifier<AsyncValue<int>> {
+//   final Ref ref;
+
+//   PendingLeavesNotifier(this.ref) : super(const AsyncLoading()) {
+//     loadPendingCount();
+//   }
+
+//   Future<void> loadPendingCount() async {
+//     state = const AsyncLoading();
+//     try {
+//       final user = ref.read(authProvider).value;
+//       if (user == null || !user.isManagerial) {
+//         state = const AsyncData(0);
+//         return;
+//       }
+
+//       final repo = ref.read(leaveRepositoryProvider);
+//       final count = await repo.getPendingLeavesCount(user.empId);
+//       state = AsyncData(count);
+//     } catch (e, stack) {
+//       state = AsyncError(e, stack);
+//     }
+//   }
+// }
 
 // // lib/features/leaves/presentation/providers/leave_notifier.dart
 // import 'package:appattendance/core/database/db_helper.dart';

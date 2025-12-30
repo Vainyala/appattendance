@@ -32,6 +32,9 @@ mixin _$LeaveModel {
   String? get managerComments => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
+  String? get fromTime =>
+      throw _privateConstructorUsedError; // e.g., "09:00" (HH:mm string)
+  String? get toTime => throw _privateConstructorUsedError;
 
   /// Serializes this LeaveModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -62,6 +65,8 @@ abstract class $LeaveModelCopyWith<$Res> {
     String? managerComments,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? fromTime,
+    String? toTime,
   });
 }
 
@@ -91,6 +96,8 @@ class _$LeaveModelCopyWithImpl<$Res, $Val extends LeaveModel>
     Object? managerComments = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
+    Object? fromTime = freezed,
+    Object? toTime = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -138,6 +145,14 @@ class _$LeaveModelCopyWithImpl<$Res, $Val extends LeaveModel>
                 ? _value.updatedAt
                 : updatedAt // ignore: cast_nullable_to_non_nullable
                       as DateTime?,
+            fromTime: freezed == fromTime
+                ? _value.fromTime
+                : fromTime // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            toTime: freezed == toTime
+                ? _value.toTime
+                : toTime // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
@@ -165,6 +180,8 @@ abstract class _$$LeaveModelImplCopyWith<$Res>
     String? managerComments,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? fromTime,
+    String? toTime,
   });
 }
 
@@ -193,6 +210,8 @@ class __$$LeaveModelImplCopyWithImpl<$Res>
     Object? managerComments = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
+    Object? fromTime = freezed,
+    Object? toTime = freezed,
   }) {
     return _then(
       _$LeaveModelImpl(
@@ -240,6 +259,14 @@ class __$$LeaveModelImplCopyWithImpl<$Res>
             ? _value.updatedAt
             : updatedAt // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
+        fromTime: freezed == fromTime
+            ? _value.fromTime
+            : fromTime // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        toTime: freezed == toTime
+            ? _value.toTime
+            : toTime // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -260,6 +287,8 @@ class _$LeaveModelImpl extends _LeaveModel {
     this.managerComments,
     this.createdAt,
     this.updatedAt,
+    this.fromTime,
+    this.toTime,
   }) : super._();
 
   factory _$LeaveModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -287,10 +316,15 @@ class _$LeaveModelImpl extends _LeaveModel {
   final DateTime? createdAt;
   @override
   final DateTime? updatedAt;
+  @override
+  final String? fromTime;
+  // e.g., "09:00" (HH:mm string)
+  @override
+  final String? toTime;
 
   @override
   String toString() {
-    return 'LeaveModel(leaveId: $leaveId, empId: $empId, mgrEmpId: $mgrEmpId, leaveFromDate: $leaveFromDate, leaveToDate: $leaveToDate, leaveType: $leaveType, leaveJustification: $leaveJustification, leaveApprovalStatus: $leaveApprovalStatus, managerComments: $managerComments, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'LeaveModel(leaveId: $leaveId, empId: $empId, mgrEmpId: $mgrEmpId, leaveFromDate: $leaveFromDate, leaveToDate: $leaveToDate, leaveType: $leaveType, leaveJustification: $leaveJustification, leaveApprovalStatus: $leaveApprovalStatus, managerComments: $managerComments, createdAt: $createdAt, updatedAt: $updatedAt, fromTime: $fromTime, toTime: $toTime)';
   }
 
   @override
@@ -317,7 +351,10 @@ class _$LeaveModelImpl extends _LeaveModel {
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
-                other.updatedAt == updatedAt));
+                other.updatedAt == updatedAt) &&
+            (identical(other.fromTime, fromTime) ||
+                other.fromTime == fromTime) &&
+            (identical(other.toTime, toTime) || other.toTime == toTime));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -335,6 +372,8 @@ class _$LeaveModelImpl extends _LeaveModel {
     managerComments,
     createdAt,
     updatedAt,
+    fromTime,
+    toTime,
   );
 
   /// Create a copy of LeaveModel
@@ -364,6 +403,8 @@ abstract class _LeaveModel extends LeaveModel {
     final String? managerComments,
     final DateTime? createdAt,
     final DateTime? updatedAt,
+    final String? fromTime,
+    final String? toTime,
   }) = _$LeaveModelImpl;
   const _LeaveModel._() : super._();
 
@@ -392,6 +433,10 @@ abstract class _LeaveModel extends LeaveModel {
   DateTime? get createdAt;
   @override
   DateTime? get updatedAt;
+  @override
+  String? get fromTime; // e.g., "09:00" (HH:mm string)
+  @override
+  String? get toTime;
 
   /// Create a copy of LeaveModel
   /// with the given fields replaced by the non-null parameter values.

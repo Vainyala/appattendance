@@ -1,3 +1,296 @@
+// lib/features/leaves/presentation/widgets/leave_detail_dialog.dart
+// Final upgraded version: Riverpod integration + LeaveModel freezed + real approve/reject
+// Dec 30, 2025 - Production-ready, loading state, error handling, dark mode
+
+import 'package:appattendance/core/utils/app_colors.dart';
+import 'package:appattendance/features/leaves/domain/models/leave_model.dart';
+import 'package:appattendance/features/leaves/presentation/providers/leave_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+
+class LeaveDetailDialog extends ConsumerStatefulWidget {
+  final LeaveModel leave;
+  final bool isManagerView;
+
+  const LeaveDetailDialog({
+    super.key,
+    required this.leave,
+    this.isManagerView = false,
+  });
+
+  @override
+  ConsumerState<LeaveDetailDialog> createState() => _LeaveDetailDialogState();
+}
+
+class _LeaveDetailDialogState extends ConsumerState<LeaveDetailDialog> {
+  final TextEditingController _remarksController = TextEditingController();
+  bool _isSubmitting = false;
+
+  @override
+  void dispose() {
+    _remarksController.dispose();
+    super.dispose();
+  }
+
+  Color _getStatusColor(LeaveStatus status) {
+    return switch (status) {
+      LeaveStatus.pending => Colors.orange,
+      LeaveStatus.approved => Colors.green,
+      LeaveStatus.rejected => Colors.red,
+      LeaveStatus.cancelled => Colors.grey,
+      LeaveStatus.query => Colors.blue, // Added for query status
+      _ => Colors.grey, // Default fallback (safety)
+    };
+  }
+
+  String _getStatusText(LeaveStatus status) {
+    return status.name[0].toUpperCase() + status.name.substring(1);
+  }
+
+  Future<void> _submitAction(LeaveStatus newStatus) async {
+    final remarks = _remarksController.text.trim();
+
+    if (newStatus != LeaveStatus.approved &&
+        newStatus != LeaveStatus.rejected) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Invalid action')));
+      return;
+    }
+
+    if (remarks.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Remarks are required')));
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      final repo = ref.read(leaveRepositoryProvider);
+      await repo.updateLeaveStatus(
+        leaveId: widget.leave.leaveId,
+        newStatus: newStatus,
+        managerComments: remarks,
+      );
+
+      // Refresh leaves list
+      ref.read(myLeavesProvider.notifier).loadLeaves();
+
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Leave ${newStatus.name}d successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Action failed: $e')));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final statusColor = _getStatusColor(widget.leave.leaveApprovalStatus);
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.85,
+        ),
+        padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Leave Details',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Status Badge
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Text(
+                  _getStatusText(widget.leave.leaveApprovalStatus),
+                  style: TextStyle(
+                    color: statusColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Dates & Duration
+              _buildInfoRow(
+                Icons.calendar_today,
+                'From',
+                DateFormat('dd MMM yyyy').format(widget.leave.leaveFromDate),
+              ),
+              _buildInfoRow(
+                Icons.calendar_today,
+                'To',
+                DateFormat('dd MMM yyyy').format(widget.leave.leaveToDate),
+              ),
+              _buildInfoRow(
+                Icons.date_range,
+                'Duration',
+                '${widget.leave.totalDays} days',
+              ),
+
+              const SizedBox(height: 16),
+
+              // Type & Justification
+              _buildInfoRow(
+                Icons.category,
+                'Type',
+                widget.leave.leaveType.name.toUpperCase(),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Justification',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                widget.leave.leaveJustification ?? 'No justification provided',
+                style: const TextStyle(height: 1.4),
+              ),
+
+              // Manager Remarks (if any)
+              if (widget.leave.managerComments != null &&
+                  widget.leave.managerComments!.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                const Text(
+                  'Manager Remarks',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.blue,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(widget.leave.managerComments!),
+                ),
+              ],
+
+              // Manager Approve/Reject Section
+              if (widget.isManagerView && widget.leave.isPending) ...[
+                const SizedBox(height: 24),
+                const Text(
+                  'Manager Action',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _remarksController,
+                  maxLines: 4,
+                  maxLength: 200,
+                  decoration: const InputDecoration(
+                    labelText: 'Remarks (required)',
+                    border: OutlineInputBorder(),
+                    hintText: 'Enter your comments...',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => _submitAction(LeaveStatus.rejected),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text('Reject'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _isSubmitting
+                            ? null
+                            : () => _submitAction(LeaveStatus.approved),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text('Approve'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.grey),
+          const SizedBox(width: 12),
+          Expanded(child: Text('$label: $value')),
+        ],
+      ),
+    );
+  }
+}
+
 // // lib/features/leaves/presentation/widgets/leave_detail_dialog.dart
 // // Fully updated: No hardcoded fields, aligned with employee_leaves table, production-ready, dynamic status/remarks, manager approve/reject with input
 
@@ -281,198 +574,198 @@
 //   }
 // }
 
-// // // lib/features/leaves/presentation/widgets/leave_detail_dialog.dart
+// // lib/features/leaves/presentation/widgets/leave_detail_dialog.dart
 
-// // import 'package:appattendance/core/utils/app_colors.dart';
-// // import 'package:appattendance/features/leaves/domain/models/leave_model.dart';
-// // import 'package:flutter/material.dart';
-// // import 'package:intl/intl.dart';
+// import 'package:appattendance/core/utils/app_colors.dart';
+// import 'package:appattendance/features/leaves/domain/models/leave_model.dart';
+// import 'package:flutter/material.dart';
+// import 'package:intl/intl.dart';
 
-// // class LeaveDetailDialog extends StatelessWidget {
-// //   final LeaveModel leave;
-// //   final bool isManager;
-// //   final Function(String, String)? onUpdateStatus; // (status, remarks)
+// class LeaveDetailDialog extends StatelessWidget {
+//   final LeaveModel leave;
+//   final bool isManager;
+//   final Function(String, String)? onUpdateStatus; // (status, remarks)
 
-// //   const LeaveDetailDialog({
-// //     super.key,
-// //     required this.leave,
-// //     this.isManager = false,
-// //     this.onUpdateStatus,
-// //   });
+//   const LeaveDetailDialog({
+//     super.key,
+//     required this.leave,
+//     this.isManager = false,
+//     this.onUpdateStatus,
+//   });
 
-// //   @override
-// //   Widget build(BuildContext context) {
-// //     final isDark = Theme.of(context).brightness == Brightness.dark;
-// //     final statusColor = _getStatusColor(leave.approvalStatus);
+//   @override
+//   Widget build(BuildContext context) {
+//     final isDark = Theme.of(context).brightness == Brightness.dark;
+//     final statusColor = _getStatusColor(leave.approvalStatus);
 
-// //     return Dialog(
-// //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-// //       child: Container(
-// //         constraints: BoxConstraints(
-// //           maxHeight: MediaQuery.of(context).size.height * 0.85,
-// //         ),
-// //         padding: const EdgeInsets.all(24),
-// //         child: SingleChildScrollView(
-// //           child: Column(
-// //             mainAxisSize: MainAxisSize.min,
-// //             crossAxisAlignment: CrossAxisAlignment.start,
-// //             children: [
-// //               Row(
-// //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-// //                 children: [
-// //                   Text(
-// //                     'Leave Details',
-// //                     style: Theme.of(context).textTheme.headlineSmall,
-// //                   ),
-// //                   IconButton(
-// //                     icon: const Icon(Icons.close),
-// //                     onPressed: () => Navigator.pop(context),
-// //                   ),
-// //                 ],
-// //               ),
-// //               const SizedBox(height: 16),
+//     return Dialog(
+//       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+//       child: Container(
+//         constraints: BoxConstraints(
+//           maxHeight: MediaQuery.of(context).size.height * 0.85,
+//         ),
+//         padding: const EdgeInsets.all(24),
+//         child: SingleChildScrollView(
+//           child: Column(
+//             mainAxisSize: MainAxisSize.min,
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                 children: [
+//                   Text(
+//                     'Leave Details',
+//                     style: Theme.of(context).textTheme.headlineSmall,
+//                   ),
+//                   IconButton(
+//                     icon: const Icon(Icons.close),
+//                     onPressed: () => Navigator.pop(context),
+//                   ),
+//                 ],
+//               ),
+//               const SizedBox(height: 16),
 
-// //               // Status Badge
-// //               Container(
-// //                 padding: const EdgeInsets.symmetric(
-// //                   horizontal: 16,
-// //                   vertical: 8,
-// //                 ),
-// //                 decoration: BoxDecoration(
-// //                   color: statusColor.withOpacity(0.2),
-// //                   borderRadius: BorderRadius.circular(30),
-// //                 ),
-// //                 child: Text(
-// //                   leave.approvalStatus.toUpperCase(),
-// //                   style: TextStyle(
-// //                     color: statusColor,
-// //                     fontWeight: FontWeight.bold,
-// //                   ),
-// //                 ),
-// //               ),
-// //               const SizedBox(height: 16),
+//               // Status Badge
+//               Container(
+//                 padding: const EdgeInsets.symmetric(
+//                   horizontal: 16,
+//                   vertical: 8,
+//                 ),
+//                 decoration: BoxDecoration(
+//                   color: statusColor.withOpacity(0.2),
+//                   borderRadius: BorderRadius.circular(30),
+//                 ),
+//                 child: Text(
+//                   leave.approvalStatus.toUpperCase(),
+//                   style: TextStyle(
+//                     color: statusColor,
+//                     fontWeight: FontWeight.bold,
+//                   ),
+//                 ),
+//               ),
+//               const SizedBox(height: 16),
 
-// //               // Dates
-// //               _buildInfoRow(Icons.calendar_today, 'From', leave.formattedFrom),
-// //               _buildInfoRow(Icons.calendar_today, 'To', leave.formattedTo),
-// //               _buildInfoRow(
-// //                 Icons.access_time,
-// //                 'Time',
-// //                 '${leave.fromTime.format(context)} - ${leave.toTime.format(context)}',
-// //               ),
-// //               if (leave.totalDays != null)
-// //                 _buildInfoRow(Icons.date_range, 'Duration', leave.duration),
+//               // Dates
+//               _buildInfoRow(Icons.calendar_today, 'From', leave.formattedFrom),
+//               _buildInfoRow(Icons.calendar_today, 'To', leave.formattedTo),
+//               _buildInfoRow(
+//                 Icons.access_time,
+//                 'Time',
+//                 '${leave.fromTime.format(context)} - ${leave.toTime.format(context)}',
+//               ),
+//               if (leave.totalDays != null)
+//                 _buildInfoRow(Icons.date_range, 'Duration', leave.duration),
 
-// //               const SizedBox(height: 16),
+//               const SizedBox(height: 16),
 
-// //               // Type & Justification
-// //               _buildInfoRow(
-// //                 Icons.category,
-// //                 'Type',
-// //                 leave.leaveType.name.toUpperCase(),
-// //               ),
-// //               const SizedBox(height: 8),
-// //               const Text(
-// //                 'Justification',
-// //                 style: TextStyle(fontWeight: FontWeight.w600),
-// //               ),
-// //               const SizedBox(height: 4),
-// //               Text(leave.justification, style: const TextStyle(height: 1.4)),
+//               // Type & Justification
+//               _buildInfoRow(
+//                 Icons.category,
+//                 'Type',
+//                 leave.leaveType.name.toUpperCase(),
+//               ),
+//               const SizedBox(height: 8),
+//               const Text(
+//                 'Justification',
+//                 style: TextStyle(fontWeight: FontWeight.w600),
+//               ),
+//               const SizedBox(height: 4),
+//               Text(leave.justification, style: const TextStyle(height: 1.4)),
 
-// //               if (leave.managerComments != null &&
-// //                   leave.managerComments!.isNotEmpty) ...[
-// //                 const SizedBox(height: 16),
-// //                 const Text(
-// //                   'Manager Remarks',
-// //                   style: TextStyle(
-// //                     fontWeight: FontWeight.w600,
-// //                     color: Colors.blue,
-// //                   ),
-// //                 ),
-// //                 const SizedBox(height: 4),
-// //                 Container(
-// //                   padding: const EdgeInsets.all(12),
-// //                   decoration: BoxDecoration(
-// //                     color: Colors.blue.withOpacity(0.1),
-// //                     borderRadius: BorderRadius.circular(12),
-// //                   ),
-// //                   child: Text(leave.managerComments!),
-// //                 ),
-// //               ],
+//               if (leave.managerComments != null &&
+//                   leave.managerComments!.isNotEmpty) ...[
+//                 const SizedBox(height: 16),
+//                 const Text(
+//                   'Manager Remarks',
+//                   style: TextStyle(
+//                     fontWeight: FontWeight.w600,
+//                     color: Colors.blue,
+//                   ),
+//                 ),
+//                 const SizedBox(height: 4),
+//                 Container(
+//                   padding: const EdgeInsets.all(12),
+//                   decoration: BoxDecoration(
+//                     color: Colors.blue.withOpacity(0.1),
+//                     borderRadius: BorderRadius.circular(12),
+//                   ),
+//                   child: Text(leave.managerComments!),
+//                 ),
+//               ],
 
-// //               if (isManager && leave.isPending) ...[
-// //                 const SizedBox(height: 24),
-// //                 TextField(
-// //                   maxLines: 4,
-// //                   decoration: const InputDecoration(
-// //                     labelText: 'Remarks (200+ chars)',
-// //                     border: OutlineInputBorder(),
-// //                   ),
-// //                   onChanged: (value) {
-// //                     // TODO: Store remarks for submit
-// //                   },
-// //                 ),
-// //                 const SizedBox(height: 16),
-// //                 Row(
-// //                   children: [
-// //                     Expanded(
-// //                       child: ElevatedButton(
-// //                         onPressed: () => onUpdateStatus?.call(
-// //                           'rejected',
-// //                           'Your remarks here',
-// //                         ),
-// //                         style: ElevatedButton.styleFrom(
-// //                           backgroundColor: Colors.red,
-// //                         ),
-// //                         child: const Text('Reject'),
-// //                       ),
-// //                     ),
-// //                     const SizedBox(width: 12),
-// //                     Expanded(
-// //                       child: ElevatedButton(
-// //                         onPressed: () => onUpdateStatus?.call(
-// //                           'approved',
-// //                           'Your remarks here',
-// //                         ),
-// //                         style: ElevatedButton.styleFrom(
-// //                           backgroundColor: Colors.green,
-// //                         ),
-// //                         child: const Text('Approve'),
-// //                       ),
-// //                     ),
-// //                   ],
-// //                 ),
-// //               ],
-// //             ],
-// //           ),
-// //         ),
-// //       ),
-// //     );
-// //   }
+//               if (isManager && leave.isPending) ...[
+//                 const SizedBox(height: 24),
+//                 TextField(
+//                   maxLines: 4,
+//                   decoration: const InputDecoration(
+//                     labelText: 'Remarks (200+ chars)',
+//                     border: OutlineInputBorder(),
+//                   ),
+//                   onChanged: (value) {
+//                     // TODO: Store remarks for submit
+//                   },
+//                 ),
+//                 const SizedBox(height: 16),
+//                 Row(
+//                   children: [
+//                     Expanded(
+//                       child: ElevatedButton(
+//                         onPressed: () => onUpdateStatus?.call(
+//                           'rejected',
+//                           'Your remarks here',
+//                         ),
+//                         style: ElevatedButton.styleFrom(
+//                           backgroundColor: Colors.red,
+//                         ),
+//                         child: const Text('Reject'),
+//                       ),
+//                     ),
+//                     const SizedBox(width: 12),
+//                     Expanded(
+//                       child: ElevatedButton(
+//                         onPressed: () => onUpdateStatus?.call(
+//                           'approved',
+//                           'Your remarks here',
+//                         ),
+//                         style: ElevatedButton.styleFrom(
+//                           backgroundColor: Colors.green,
+//                         ),
+//                         child: const Text('Approve'),
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ],
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
 
-// //   Widget _buildInfoRow(IconData icon, String label, String value) {
-// //     return Padding(
-// //       padding: const EdgeInsets.symmetric(vertical: 8),
-// //       child: Row(
-// //         children: [
-// //           Icon(icon, color: Colors.grey),
-// //           const SizedBox(width: 12),
-// //           Expanded(child: Text('$label: $value')),
-// //         ],
-// //       ),
-// //     );
-// //   }
+//   Widget _buildInfoRow(IconData icon, String label, String value) {
+//     return Padding(
+//       padding: const EdgeInsets.symmetric(vertical: 8),
+//       child: Row(
+//         children: [
+//           Icon(icon, color: Colors.grey),
+//           const SizedBox(width: 12),
+//           Expanded(child: Text('$label: $value')),
+//         ],
+//       ),
+//     );
+//   }
 
-// //   Color _getStatusColor(String status) {
-// //     switch (status.toLowerCase()) {
-// //       case 'pending':
-// //         return Colors.orange;
-// //       case 'approved':
-// //         return Colors.green;
-// //       case 'rejected':
-// //         return Colors.red;
-// //       default:
-// //         return Colors.grey;
-// //     }
-// //   }
-// // }
+//   Color _getStatusColor(String status) {
+//     switch (status.toLowerCase()) {
+//       case 'pending':
+//         return Colors.orange;
+//       case 'approved':
+//         return Colors.green;
+//       case 'rejected':
+//         return Colors.red;
+//       default:
+//         return Colors.grey;
+//     }
+//   }
+// }

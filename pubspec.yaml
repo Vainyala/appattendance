@@ -81,6 +81,7 @@ dependencies:
   open_file: ^3.5.10
   latlong2: ^0.9.1
   maths: ^0.0.2
+  csv: ^6.0.0
 
 dev_dependencies:
   flutter_test:

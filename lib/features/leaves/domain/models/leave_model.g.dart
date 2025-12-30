@@ -26,6 +26,8 @@ _$LeaveModelImpl _$$LeaveModelImplFromJson(Map<String, dynamic> json) =>
       updatedAt: json['updatedAt'] == null
           ? null
           : DateTime.parse(json['updatedAt'] as String),
+      fromTime: json['fromTime'] as String?,
+      toTime: json['toTime'] as String?,
     );
 
 Map<String, dynamic> _$$LeaveModelImplToJson(
@@ -42,6 +44,8 @@ Map<String, dynamic> _$$LeaveModelImplToJson(
   'managerComments': instance.managerComments,
   'createdAt': instance.createdAt?.toIso8601String(),
   'updatedAt': instance.updatedAt?.toIso8601String(),
+  'fromTime': instance.fromTime,
+  'toTime': instance.toTime,
 };
 
 const _$LeaveTypeEnumMap = {
@@ -59,4 +63,5 @@ const _$LeaveStatusEnumMap = {
   LeaveStatus.approved: 'approved',
   LeaveStatus.rejected: 'rejected',
   LeaveStatus.cancelled: 'cancelled',
+  LeaveStatus.query: 'query',
 };
