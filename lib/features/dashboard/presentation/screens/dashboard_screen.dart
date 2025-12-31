@@ -29,6 +29,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../data/dashboard_repository.dart';
+import '../widgets/common/stored_data_widget.dart';
 import '../widgets/common/working_hours_section.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -208,7 +209,7 @@ class DashboardScreen extends ConsumerWidget {
                       const SizedBox(height: 20),
                       const PresentDashboardCardSection(),
                       const SizedBox(height: 20),
-                      AttendanceBreakdownSection(),
+                      //AttendanceBreakdownSection(),
                       const SizedBox(height: 20),
                       WorkingHoursSection(
                         dailyAvg: dailyAvg,
@@ -218,16 +219,25 @@ class DashboardScreen extends ConsumerWidget {
                       const AttendanceCalendarWidget(),
                       const SizedBox(height: 20),
                       const AttendancePeriodStatsWidget(
-                        period: AttendancePeriod.monthly,
+                        period: AttendancePeriod.quarterly,
                       ),
                       const SizedBox(height: 20),
                       if (effectiveIsManager)
                         MetricsCounter(),
 
-                      const MappedProjectsWidget(),
+                     // const MappedProjectsWidget(),
+                      const SizedBox(height: 20),
 
+// ✅ Add this to show all stored data
+                      StoredDataWidget(
+                        allAttendance: state.allAttendance,
+                        allProjects: state.allProjects,
+                        allRegularization: state.allRegularization,
+                      ),
                       if (effectiveIsManager)
                         ManagerQuickActions(user: user),
+
+
 
                       const SizedBox(height: 100),
                     ],

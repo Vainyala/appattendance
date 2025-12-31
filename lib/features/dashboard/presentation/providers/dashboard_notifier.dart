@@ -5,6 +5,8 @@
 // Supports refresh/pull-to-refresh
 // Error/loading handled with AsyncValue
 
+// lib/features/dashboard/presentation/providers/dashboard_notifier.dart
+
 import 'package:appattendance/core/api/api_client.dart';
 import 'package:appattendance/core/api/api_endpoints.dart';
 import 'package:appattendance/core/database/db_helper.dart';
@@ -26,6 +28,9 @@ class DashboardState {
   final int pendingSyncCount;
   final String? welcomeMessage;
   final bool isSyncing;
+  final List<Map<String, dynamic>> allAttendance;
+  final List<Map<String, dynamic>> allProjects;
+  final List<Map<String, dynamic>> allRegularization;
 
   DashboardState({
     this.user,
@@ -37,6 +42,9 @@ class DashboardState {
     this.pendingSyncCount = 0,
     this.welcomeMessage,
     this.isSyncing = false,
+    this.allAttendance = const [],
+    this.allProjects = const [],
+    this.allRegularization = const [],
   });
 
   bool get hasCheckedInToday => todayAttendance.any((a) => a.isCheckIn);
@@ -62,6 +70,9 @@ class DashboardState {
     int? pendingSyncCount,
     String? welcomeMessage,
     bool? isSyncing,
+    List<Map<String, dynamic>>? allAttendance,
+    List<Map<String, dynamic>>? allProjects,
+    List<Map<String, dynamic>>? allRegularization,
   }) {
     return DashboardState(
       user: user ?? this.user,
@@ -73,6 +84,9 @@ class DashboardState {
       pendingSyncCount: pendingSyncCount ?? this.pendingSyncCount,
       welcomeMessage: welcomeMessage ?? this.welcomeMessage,
       isSyncing: isSyncing ?? this.isSyncing,
+      allAttendance: allAttendance ?? this.allAttendance,
+      allProjects: allProjects ?? this.allProjects,
+      allRegularization: allRegularization ?? this.allRegularization,
     );
   }
 }
@@ -85,43 +99,92 @@ StateNotifierProvider<DashboardNotifier, AsyncValue<DashboardState>>(
 class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
   final Ref ref;
   final SyncService _syncService = SyncService();
+  List<Map<String, dynamic>> projects = [];
+  bool isLoadingProjects = false;
 
   DashboardNotifier(this.ref) : super(const AsyncLoading()) {
     loadDashboard();
   }
 
-  Future<void> loadDashboard() async {
-    state = const AsyncLoading();
 
+  Future<void> loadDashboard() async {
     try {
+      state = const AsyncLoading();
+
+      // ✅ Wait for auth to be ready
+      final authState = ref.read(authProvider);
+
+      // If authProvider is still loading, wait for it
+      if (authState.isLoading) {
+        debugPrint("⏳ Waiting for auth to load...");
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+
       final user = ref.read(authProvider).value;
+
       if (user == null) {
-        state = AsyncError('Not logged in', StackTrace.current);
+        debugPrint("❌ User is null - checking DB for current user");
+
+        // ✅ Try to get user from DB
+        final currentUser = await DBHelper.instance.getCurrentUser();
+
+        if (currentUser == null) {
+          state = AsyncError("Unable to refresh data", StackTrace.current);
+          return;
+        }
+
+        debugPrint("✅ Found user in DB: ${currentUser['emp_id']}");
+
+        // Create UserModel from DB data
+        final userModel = UserModel(
+          empId: currentUser['emp_id'],
+          name: currentUser['emp_name'],
+          email: currentUser['emp_email'],
+          role: currentUser['emp_role'],
+          department: currentUser['emp_department'],
+          orgShortName: currentUser['org_short_name'],
+          status: currentUser['emp_status'],
+        );
+
+        // Load dashboard with DB user
+        await _loadDashboardData(userModel);
         return;
       }
 
       debugPrint("🔄 Loading dashboard for ${user.empId}");
 
-      // Check if initial sync is needed
-      final isInitialSyncDone = await DBHelper.instance.isInitialSyncDone();
+      await _loadDashboardData(user);
 
-      if (!isInitialSyncDone) {
-        debugPrint("🔄 Performing initial sync...");
-        await _syncService.initialSync(user.empId);
-        await DBHelper.instance.markInitialSyncDone();
-      }
-
-      // Fetch data from local DB
-      final dashboardData = await _loadLocalData(user);
-
-      // Fetch analytics from API (async - won't block UI)
-      _fetchAnalyticsData(user.empId);
-
-      state = AsyncData(dashboardData);
     } catch (e, stack) {
       debugPrint("❌ Dashboard load error: $e");
       state = AsyncError(e, stack);
     }
+  }
+
+  Future<void> _loadDashboardData(UserModel user) async {
+    // Check if initial sync is needed
+    final isInitialSyncDone = await DBHelper.instance.isInitialSyncDone();
+
+    if (!isInitialSyncDone) {
+      debugPrint("🔄 Performing initial sync...");
+
+      try {
+        await _syncService.initialSync(user.empId);
+        await DBHelper.instance.markInitialSyncDone();
+        debugPrint("✅ Initial sync completed");
+      } catch (e) {
+        debugPrint("⚠️ Initial sync failed, will use cached data: $e");
+        // Continue with cached data even if sync fails
+      }
+    }
+
+    // Fetch data from local DB
+    final dashboardData = await _loadLocalData(user);
+
+    // Fetch analytics from API (async - won't block UI)
+    _fetchAnalyticsData(user.empId);
+
+    state = AsyncData(dashboardData);
   }
 
   /// Load data from local SQLite DB
@@ -132,7 +195,7 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
 
       debugPrint("📊 Loading local data for $today");
 
-      // Today's attendance
+      // Today's attendance - use LIKE on att_timestamp
       final attendanceRows = await db.query(
         'employee_attendance',
         where: 'emp_id = ? AND att_timestamp LIKE ?',
@@ -143,8 +206,59 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
       final todayAttendance = attendanceRows.map(attendanceFromDB).toList();
       debugPrint("📊 Found ${todayAttendance.length} attendance records for today");
 
+      // Get ALL attendance records for the current month
+      final now = DateTime.now();
+      final firstDayOfMonth = DateTime(now.year, now.month, 1);
+      final monthStart = '${firstDayOfMonth.toString().substring(0, 10)} 00:00:00';
+
+      final allMonthAttendance = await db.query(
+        'employee_attendance',
+        where: 'emp_id = ? AND att_timestamp >= ?',
+        whereArgs: [user.empId, monthStart],
+        orderBy: 'att_timestamp DESC',
+        limit: 50, // Limit to last 50 records
+      );
+
+      debugPrint("📊 Found ${allMonthAttendance.length} attendance records this month");
+
+      // Get ALL mapped projects
+      // Get ALL mapped projects
+      final mappedProjectsRows = await db.query(
+        'employee_mapped_projects',
+        where: 'emp_id = ? AND mapping_status = ?',
+        whereArgs: [user.empId, 'active'],
+      );
+
+      final projectIds = mappedProjectsRows
+          .map((m) => m['project_id'] as String)
+          .toList();
+
+      List<Map<String, dynamic>> projects = [];
+      if (projectIds.isNotEmpty) {
+        projects = await db.query(
+          'project_master',
+          where: 'project_id IN (${List.filled(projectIds.length, '?').join(',')})',
+          whereArgs: projectIds,
+        );
+      }
+
+
+      debugPrint("📊 Found ${projects.length} mapped projects");
+
+      // Get ALL regularization requests
+      final regularizationRows = await db.query(
+        'employee_regularization',
+        where: 'emp_id = ?',
+        whereArgs: [user.empId],
+        orderBy: 'reg_date_applied DESC',
+        limit: 20, // Limit to last 20 records
+      );
+
+      debugPrint("📊 Found ${regularizationRows.length} regularization requests");
+
       // Pending sync count
       final pendingSyncCount = await DBHelper.instance.getPendingTransactionsCount(user.empId);
+      debugPrint("📊 Pending sync count: $pendingSyncCount");
 
       // Team stats (only if managerial)
       int teamSize = 0;
@@ -186,8 +300,11 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
         presentToday: presentToday,
         pendingSyncCount: pendingSyncCount,
         welcomeMessage: welcome,
-        analyticsData: {}, // Will be updated by API call
+        analyticsData: {},
         workingHoursData: {},
+        allAttendance: allMonthAttendance,
+        allProjects: projects,
+        allRegularization: regularizationRows,
       );
     } catch (e) {
       debugPrint("❌ Error loading local data: $e");
@@ -200,7 +317,6 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
     try {
       debugPrint("🔄 Fetching analytics data from API...");
 
-      // Fetch monthly analytics summary
       final analyticsResponse = await ApiClient.get(
         ApiEndpoints.attendanceAnalyticsSummary,
         params: {
@@ -215,7 +331,6 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
       if (analyticsResponse['success'] == true && analyticsResponse['data'] != null) {
         analyticsData = analyticsResponse['data'] as Map<String, dynamic>;
       } else {
-        // Use defaults if API fails
         analyticsData = {
           'present': 0,
           'leave': 0,
@@ -226,10 +341,8 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
         };
       }
 
-      // Calculate working hours
       final workingHoursData = await _calculateWorkingHours(empId, analyticsData);
 
-      // Update state with analytics data
       state.whenData((currentState) {
         state = AsyncData(currentState.copyWith(
           analyticsData: analyticsData,
@@ -240,7 +353,7 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
       debugPrint("✅ Analytics data updated");
     } catch (e) {
       debugPrint("❌ Failed to fetch analytics: $e");
-      // Don't throw - just use default values
+
       state.whenData((currentState) {
         state = AsyncData(currentState.copyWith(
           analyticsData: {
@@ -260,13 +373,11 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
     }
   }
 
-  /// Calculate working hours averages
   Future<Map<String, double>> _calculateWorkingHours(
       String empId,
       Map<String, dynamic> monthlyData,
       ) async {
     try {
-      // Fetch weekly analytics for recent working hours
       final weeklyResponse = await ApiClient.get(
         ApiEndpoints.attendanceAnalyticsSummary,
         params: {
@@ -280,7 +391,6 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
         weeklyData = weeklyResponse['data'] as Map<String, dynamic>;
       }
 
-      // Calculate daily average from weekly data
       final totalWorkedHrs = double.tryParse(
           weeklyData['total_worked_hrs']?.toString() ?? '0'
       ) ?? 0.0;
@@ -291,9 +401,12 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
 
       final dailyAvg = workingDays > 0 ? totalWorkedHrs / workingDays : 0.0;
 
-      // Calculate monthly average
-      final monthlyTotalHrs = (monthlyData['total_worked_hrs'] ?? 0).toDouble();
-      final monthlyWorkingDays = (monthlyData['present'] ?? 1).toInt();
+      final monthlyTotalHrs =
+          double.tryParse(monthlyData['total_worked_hrs']?.toString() ?? '0') ?? 0.0;
+
+      final monthlyWorkingDays =
+          int.tryParse(monthlyData['present']?.toString() ?? '0') ?? 0;
+
       final monthlyAvg = monthlyWorkingDays > 0
           ? monthlyTotalHrs / monthlyWorkingDays
           : 0.0;
@@ -311,49 +424,59 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
     }
   }
 
-  /// Manual sync triggered by user
   Future<void> refresh() async {
     try {
       final user = ref.read(authProvider).value;
-      if (user == null) return;
+      if (user == null) {
+        // Try DB fallback
+        final currentUser = await DBHelper.instance.getCurrentUser();
+        if (currentUser == null) return;
 
-      // Update syncing state
-      state.whenData((currentState) {
-        state = AsyncData(currentState.copyWith(isSyncing: true));
-      });
+        final userModel = UserModel(
+          empId: currentUser['emp_id'],
+          name: currentUser['emp_name'],
+          email: currentUser['emp_email'],
+          role: currentUser['emp_role'],
+          department: currentUser['emp_department'],
+          orgShortName: currentUser['org_short_name'],
+          status: currentUser['emp_status'],
+        );
 
-      debugPrint("🔄 Manual sync triggered");
-
-      // Perform sync
-      final syncResult = await _syncService.manualSync(user.empId);
-
-      if (syncResult.success) {
-        debugPrint("✅ Manual sync completed");
-
-        // Reload dashboard after sync
-        await loadDashboard();
-      } else {
-        debugPrint("⚠️ Manual sync failed: ${syncResult.message}");
-        throw Exception(syncResult.message);
+        await _performRefresh(userModel);
+        return;
       }
 
-      // Reset syncing state
-      state.whenData((currentState) {
-        state = AsyncData(currentState.copyWith(isSyncing: false));
-      });
+      await _performRefresh(user);
+
     } catch (e) {
       debugPrint("❌ Refresh failed: $e");
-
-      // Reset syncing state on error
-      state.whenData((currentState) {
-        state = AsyncData(currentState.copyWith(isSyncing: false));
-      });
-
       rethrow;
     }
   }
 
-  /// Check-in
+  Future<void> _performRefresh(UserModel user) async {
+    state.whenData((currentState) {
+      state = AsyncData(currentState.copyWith(isSyncing: true));
+    });
+
+    debugPrint("🔄 Manual sync triggered");
+
+    final syncResult = await _syncService.manualSync(user.empId);
+
+    if (syncResult.success) {
+      debugPrint("✅ Manual sync completed");
+      await loadDashboard();
+    } else {
+      debugPrint("⚠️ Sync failed: ${syncResult.message}");
+      // ❗ DO NOT THROW
+    }
+
+    state.whenData((currentState) {
+      state = AsyncData(currentState.copyWith(isSyncing: false));
+    });
+  }
+
+
   Future<void> checkIn({
     required double latitude,
     required double longitude,
@@ -363,7 +486,7 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
   }) async {
     try {
       final user = ref.read(authProvider).value;
-      if (user == null) throw Exception('Not logged in');
+      if (user == null) throw Exception("Unable to refresh data");
 
       debugPrint("🔵 Checking in...");
 
@@ -387,7 +510,6 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
       if (response['success'] == true) {
         debugPrint("✅ Check-in successful");
 
-        // Save to local DB
         final db = await DBHelper.instance.database;
         await db.insert(
           'employee_attendance',
@@ -398,7 +520,6 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
 
-        // Reload dashboard
         await loadDashboard();
       } else {
         throw Exception(response['message'] ?? 'Check-in failed');
@@ -409,7 +530,6 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
     }
   }
 
-  /// Check-out
   Future<void> checkOut({
     required double latitude,
     required double longitude,
@@ -417,7 +537,7 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
   }) async {
     try {
       final user = ref.read(authProvider).value;
-      if (user == null) throw Exception('Not logged in');
+      if (user == null) throw Exception("Unable to refresh data");
 
       debugPrint("🔴 Checking out...");
 
@@ -439,7 +559,6 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
       if (response['success'] == true) {
         debugPrint("✅ Check-out successful");
 
-        // Save to local DB
         final db = await DBHelper.instance.database;
         await db.insert(
           'employee_attendance',
@@ -450,7 +569,6 @@ class DashboardNotifier extends StateNotifier<AsyncValue<DashboardState>> {
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
 
-        // Reload dashboard
         await loadDashboard();
       } else {
         throw Exception(response['message'] ?? 'Check-out failed');

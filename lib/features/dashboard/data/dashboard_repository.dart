@@ -40,6 +40,19 @@ class DashboardRepository {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getEmployeeProjects(String empId) async {
+    final db = await DBHelper.instance.database;
+
+    return await db.rawQuery('''
+    SELECT pm.*
+    FROM project_master pm
+    JOIN employee_mapped_projects emp
+      ON pm.project_id = emp.project_id
+    WHERE emp.emp_id = ?
+  ''', [empId]);
+  }
+
+
   /// 🔥 Fetch Daily Analytics
   Future<Map<String, dynamic>> fetchDailyAnalytics({
     required String empId,
@@ -112,13 +125,16 @@ class DashboardRepository {
   }
 
   /// 🔥 Manual Sync - Call this from refresh button
+  /// 🔥 Manual Sync - SAFE (DO NOT THROW)
   Future<void> manualSync(String empId) async {
     final result = await _syncService.manualSync(empId);
 
     if (!result.success) {
-      throw Exception(result.message);
+      debugPrint("⚠️ Sync failed but keeping offline data: ${result.message}");
+      // DO NOT throw
     }
   }
+
 
   /// Fetch Attendance Summary (with offline fallback)
   Future<Map<String, dynamic>> fetchSummary({

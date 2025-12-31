@@ -1,7 +1,7 @@
 // lib/core/api/api_endpoints.dart - COMPLETE VERSION
 class ApiEndpoints {
   // Base URL - Change this to your server IP
-  static const baseUrl = "https://41f0b8f8f812.ngrok-free.app/api/v1";
+  static const baseUrl = "https://1a2c92bf0bda.ngrok-free.app/api/v1";
 
   // Authentication
   static const login = "$baseUrl/auth/login";

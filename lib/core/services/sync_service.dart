@@ -4,6 +4,7 @@ import '../api/api_client.dart';
 import '../api/api_endpoints.dart';
 import '../database/db_helper.dart';
 import 'package:sqflite/sqflite.dart';
+import 'dart:convert';
 
 class SyncService {
   final DBHelper _db = DBHelper.instance;
@@ -187,7 +188,6 @@ class SyncService {
           }
         });
 
-
         // Fetch full project details for each mapped project
         final projectIds = mappedProjects
             .map((m) => m['project_id'] as String)
@@ -202,13 +202,28 @@ class SyncService {
             );
 
             if (projectRes['success'] == true && projectRes['data'] != null) {
+
+              final projectData =
+              Map<String, dynamic>.from(projectRes['data']);
+
+              // ✅ STEP-5 FIX 1: ADD org_short_name (MANDATORY)
+              projectData['org_short_name'] =
+                  projectData['org_short_name'] ?? response['data'][0]['org_short_name'];
+
+              // ✅ STEP-5 FIX 2: Convert project_site JSON → STRING
+              if (projectData['project_site'] != null &&
+                  projectData['project_site'] is Map) {
+                projectData['project_site'] =
+                    jsonEncode(projectData['project_site']);
+              }
+
               await db.insert(
                 'project_master',
-                projectRes['data'], // ✅ CORRECT (p.*)
+                projectData,
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );
 
-              debugPrint("✅ Project $projectId saved");
+              debugPrint("✅ Project ${projectData['project_id']} saved");
             }
 
           } catch (e) {
@@ -239,10 +254,8 @@ class SyncService {
       // Determine date range based on cut-off (5th)
       DateTime fromDate;
       if (now.day <= 5) {
-        // Show full previous month + current month
         fromDate = previousMonth;
       } else {
-        // Show only current month
         fromDate = firstDayOfMonth;
       }
 
@@ -262,28 +275,39 @@ class SyncService {
 
       if (response['success'] == true && response['data'] != null) {
         final db = await _db.database;
-        final records = response['data']['data'] as List;
+        final records = (response['data'] is Map &&
+            response['data']['data'] is List)
+            ? response['data']['data'] as List
+            : [];
+
 
         debugPrint("📊 Found ${records.length} attendance records");
 
-        // Clear old attendance in date range
+        // ✅ FIX: Use att_timestamp instead of att_date for filtering
+        // Clear old attendance in date range using timestamp
         await db.delete(
           'employee_attendance',
-          where: 'emp_id = ? AND att_date >= ? AND att_date <= ?',
+          where: 'emp_id = ? AND att_timestamp >= ? AND att_timestamp < ?',
           whereArgs: [
             empId,
-            fromDate.toString().substring(0, 10),
-            toDate.toString().substring(0, 10),
+            '${fromDate.toString().substring(0, 10)} 00:00:00',
+            '${toDate.add(Duration(days: 1)).toString().substring(0, 10)} 00:00:00',
           ],
         );
 
         // Insert new attendance records
         for (var record in records) {
-          await db.insert(
-            'employee_attendance',
-            record,
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
+          // ✅ Ensure att_timestamp is present and valid
+          if (record['att_timestamp'] != null) {
+            await db.insert(
+              'employee_attendance',
+              {
+                ...record,
+                'is_synced': 1, // Mark as synced
+              },
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+          }
         }
 
         debugPrint("✅ Saved ${records.length} attendance records");

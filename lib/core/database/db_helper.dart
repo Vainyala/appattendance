@@ -131,13 +131,14 @@ is_synced INTEGER DEFAULT 0,
          role_id INTEGER PRIMARY KEY, -- No AUTOINCREMENT as per document 
          role_name TEXT NOT NULL ) ''');
     // 9. employee_mapped_projects
-    await db.execute(
-      ''' CREATE TABLE employee_mapped_projects ( id INTEGER PRIMARY KEY AUTOINCREMENT,
-         emp_id TEXT NOT NULL, project_id TEXT NOT NULL,
-          mapping_status TEXT,
-           created_at TEXT DEFAULT (datetime('now')),
-            updated_at TEXT DEFAULT (datetime('now')) ) ''',
-    ); // 10. employee_shifts
+    await db.execute('''
+CREATE TABLE employee_mapped_projects (
+  emp_id TEXT NOT NULL,
+  project_id TEXT NOT NULL,
+  mapping_status TEXT DEFAULT 'active',
+  PRIMARY KEY (emp_id, project_id)
+)
+'''); // 10. employee_shifts
     await db.execute(''' CREATE TABLE employee_shifts ( emp_id TEXT NOT NULL, 
         shift_id TEXT, 
         created_at TEXT DEFAULT (datetime('now')),
