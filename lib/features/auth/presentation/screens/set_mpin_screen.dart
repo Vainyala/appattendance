@@ -1,11 +1,10 @@
-// lib/features/auth/presentation/screens/set_mpin_screen.dart
-// Final production-ready Set MPIN Screen
-// Opens after set_password_screen.dart (password set hone ke baad)
+// // lib/features/auth/presentation/screens/set_mpin_screen.dart
+// FINAL UPDATED VERSION - January 05, 2026
+// Fixes overflow in portrait & landscape
+// Responsive layout with SingleChildScrollView
 // Saves 6-digit MPIN in 'user' table (local SQLite dummy mode)
-// Future API-ready (commented)
 // Full validation, auto-focus, dark mode, loading & error handling
 // Navigation to Dashboard on success
-// Current date context: December 29, 2025
 
 import 'package:appattendance/core/database/db_helper.dart';
 import 'package:appattendance/core/utils/app_colors.dart';
@@ -54,7 +53,9 @@ class _SetMPINScreenState extends ConsumerState<SetMPINScreen>
     _animController.forward();
 
     // Auto-focus first field
-    _focusNodes[0].requestFocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNodes[0].requestFocus();
+    });
   }
 
   @override
@@ -108,7 +109,7 @@ class _SetMPINScreenState extends ConsumerState<SetMPINScreen>
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const DashboardScreen()),
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
     } catch (e) {
       setState(() {
@@ -124,6 +125,8 @@ class _SetMPINScreenState extends ConsumerState<SetMPINScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = screenSize.width > screenSize.height;
 
     return Scaffold(
       body: Container(
@@ -139,166 +142,198 @@ class _SetMPINScreenState extends ConsumerState<SetMPINScreen>
         child: SafeArea(
           child: FadeTransition(
             opacity: _fadeAnimation,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Icon
-                  Center(
-                    child: Icon(
-                      Icons.pin_rounded,
-                      size: 100,
-                      color: isDark ? Colors.white : AppColors.primary,
+            child: SingleChildScrollView(
+              // ← Added to fix overflow in both modes
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.symmetric(
+                horizontal: isLandscape ? 60.0 : 32.0,
+                vertical: 24.0,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight:
+                      screenSize.height -
+                      MediaQuery.of(context).padding.top -
+                      kToolbarHeight,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Icon (smaller in landscape)
+                    Center(
+                      child: Icon(
+                        Icons.pin_rounded,
+                        size: isLandscape ? 80 : 100,
+                        color: isDark ? Colors.white : AppColors.primary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 40),
+                    SizedBox(height: isLandscape ? 24 : 40),
 
-                  // Title
-                  Text(
-                    'Set Your MPIN',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black87,
+                    // Title
+                    Text(
+                      'Set Your MPIN',
+                      style: TextStyle(
+                        fontSize: isLandscape ? 28 : 32,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
+                    SizedBox(height: isLandscape ? 12 : 16),
 
-                  // Subtitle
-                  Text(
-                    'Create a 6-digit MPIN for quick login',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: isDark ? Colors.white70 : Colors.grey[700],
+                    // Subtitle
+                    Text(
+                      'Create a 6-digit MPIN for quick login',
+                      style: TextStyle(
+                        fontSize: isLandscape ? 14 : 16,
+                        color: isDark ? Colors.white70 : Colors.grey[700],
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 48),
+                    SizedBox(height: isLandscape ? 32 : 48),
 
-                  // MPIN Fields
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(
-                      6,
-                      (index) => SizedBox(
-                        width: 50,
-                        child: TextField(
-                          controller: _controllers[index],
-                          focusNode: _focusNodes[index],
-                          textAlign: TextAlign.center,
-                          keyboardType: TextInputType.number,
-                          maxLength: 1,
-                          obscureText: true,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          decoration: InputDecoration(
-                            counterText: '',
-                            filled: true,
-                            fillColor: isDark
-                                ? Colors.grey[800]
-                                : Colors.grey[100],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
+                    // MPIN Fields - Responsive with FittedBox
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          6,
+                          (index) => Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6.0,
+                            ),
+                            child: SizedBox(
+                              width: isLandscape ? 45 : 50,
+                              child: TextField(
+                                controller: _controllers[index],
+                                focusNode: _focusNodes[index],
+                                textAlign: TextAlign.center,
+                                keyboardType: TextInputType.number,
+                                maxLength: 1,
+                                obscureText: true,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                decoration: InputDecoration(
+                                  counterText: '',
+                                  filled: true,
+                                  fillColor: isDark
+                                      ? Colors.grey[800]
+                                      : Colors.grey[100],
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                ),
+                                onChanged: (value) {
+                                  if (value.isNotEmpty && index < 5) {
+                                    _focusNodes[index + 1].requestFocus();
+                                  } else if (value.isEmpty && index > 0) {
+                                    _focusNodes[index - 1].requestFocus();
+                                  }
+
+                                  // Auto-save on last digit
+                                  if (index == 5 && value.isNotEmpty) {
+                                    _saveMPIN();
+                                  }
+                                },
+                              ),
                             ),
                           ),
-                          onChanged: (value) {
-                            if (value.isNotEmpty && index < 5) {
-                              _focusNodes[index + 1].requestFocus();
-                            } else if (value.isEmpty && index > 0) {
-                              _focusNodes[index - 1].requestFocus();
-                            }
-
-                            // Auto-save on last digit
-                            if (index == 5 && value.isNotEmpty) {
-                              _saveMPIN();
-                            }
-                          },
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                    SizedBox(height: isLandscape ? 12 : 16),
 
-                  // Error Message
-                  if (_errorMessage != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        _errorMessage!,
-                        style: const TextStyle(color: Colors.red, fontSize: 14),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-
-                  const SizedBox(height: 32),
-
-                  // Save Button
-                  SizedBox(
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _isSaving || _mpin.length != 6
-                          ? null
-                          : _saveMPIN,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    // Error Message
+                    if (_errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        elevation: 6,
                       ),
-                      child: _isSaving
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
+
+                    SizedBox(height: isLandscape ? 24 : 32),
+
+                    // Save Button
+                    SizedBox(
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _isSaving || _mpin.length != 6
+                            ? null
+                            : _saveMPIN,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 6,
+                        ),
+                        child: _isSaving
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                            : const Text(
+                                'SAVE MPIN',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
-                            )
-                          : const Text(
-                              'SAVE MPIN',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 24),
+                    SizedBox(height: isLandscape ? 16 : 24),
 
-                  // Back to Login
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      );
-                    },
-                    child: const Text(
-                      'Back to Login',
-                      style: TextStyle(color: AppColors.primary, fontSize: 16),
+                    // Back to Login
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        'Back to Login',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
-                  ),
 
-                  const SizedBox(height: 40),
+                    SizedBox(height: isLandscape ? 24 : 40),
 
-                  // Footer
-                  Text(
-                    '© 2025 Nutantek • Enterprise Edition',
-                    style: TextStyle(
-                      color: isDark ? Colors.white60 : Colors.grey[600],
-                      fontSize: 12,
+                    // Footer
+                    Text(
+                      '© 2025 Nutantek • Enterprise Edition',
+                      style: TextStyle(
+                        color: isDark ? Colors.white60 : Colors.grey[600],
+                        fontSize: 12,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

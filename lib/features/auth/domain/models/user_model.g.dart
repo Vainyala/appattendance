@@ -15,10 +15,11 @@ _$UserModelImpl _$$UserModelImplFromJson(Map<String, dynamic> json) =>
       phone: json['phone'] as String?,
       role: $enumDecode(_$UserRoleEnumMap, json['role']),
       department: json['department'] as String?,
-      designation: json['designation'] as String?,
+      designation: json['designation'] as String? ?? 'Employee',
       joiningDate: json['joiningDate'] == null
           ? null
           : DateTime.parse(json['joiningDate'] as String),
+      joiningDateStr: json['joiningDateStr'] as String?,
       status:
           $enumDecodeNullable(_$UserStatusEnumMap, json['status']) ??
           UserStatus.active,
@@ -38,8 +39,10 @@ _$UserModelImpl _$$UserModelImplFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const [],
+      biometricEnabled: json['biometricEnabled'] as bool? ?? false,
       shiftId: json['shiftId'] as String?,
       reportingManagerId: json['reportingManagerId'] as String?,
+      profilePhoto: json['profilePhoto'] as String?,
     );
 
 Map<String, dynamic> _$$UserModelImplToJson(_$UserModelImpl instance) =>
@@ -53,13 +56,16 @@ Map<String, dynamic> _$$UserModelImplToJson(_$UserModelImpl instance) =>
       'department': instance.department,
       'designation': instance.designation,
       'joiningDate': instance.joiningDate?.toIso8601String(),
+      'joiningDateStr': instance.joiningDateStr,
       'status': _$UserStatusEnumMap[instance.status]!,
       'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
       'assignedProjectIds': instance.assignedProjectIds,
       'projectNames': instance.projectNames,
+      'biometricEnabled': instance.biometricEnabled,
       'shiftId': instance.shiftId,
       'reportingManagerId': instance.reportingManagerId,
+      'profilePhoto': instance.profilePhoto,
     };
 
 const _$UserRoleEnumMap = {

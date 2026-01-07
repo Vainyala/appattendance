@@ -32,6 +32,14 @@ _$TaskModelImpl _$$TaskModelImplFromJson(Map<String, dynamic> json) =>
               ?.map((e) => AttachedFile.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      assignedToEmpId: json['assignedToEmpId'] as String?,
+      assignedToName: json['assignedToName'] as String?,
+      createdAt: json['createdAt'] == null
+          ? null
+          : DateTime.parse(json['createdAt'] as String),
+      updatedAt: json['updatedAt'] == null
+          ? null
+          : DateTime.parse(json['updatedAt'] as String),
     );
 
 Map<String, dynamic> _$$TaskModelImplToJson(_$TaskModelImpl instance) =>
@@ -54,6 +62,10 @@ Map<String, dynamic> _$$TaskModelImplToJson(_$TaskModelImpl instance) =>
       'notes': instance.notes,
       'billable': instance.billable,
       'attachedFiles': instance.attachedFiles,
+      'assignedToEmpId': instance.assignedToEmpId,
+      'assignedToName': instance.assignedToName,
+      'createdAt': instance.createdAt?.toIso8601String(),
+      'updatedAt': instance.updatedAt?.toIso8601String(),
     };
 
 const _$TaskPriorityEnumMap = {
@@ -65,6 +77,7 @@ const _$TaskPriorityEnumMap = {
 
 const _$TaskStatusEnumMap = {
   TaskStatus.assigned: 'assigned',
+  TaskStatus.inProgress: 'inProgress',
   TaskStatus.resolved: 'resolved',
   TaskStatus.closed: 'closed',
   TaskStatus.pending: 'pending',

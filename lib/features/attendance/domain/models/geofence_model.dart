@@ -12,7 +12,7 @@ class GeofenceModel with _$GeofenceModel {
   const GeofenceModel._();
 
   const factory GeofenceModel({
-    required String id, // e.g., "OFFICE_MAIN" or UUID
+    required String geoId, // e.g., "OFFICE_MAIN" or UUID
     required String name, // "Main Office", "Client Site A"
     required double latitude,
     required double longitude,

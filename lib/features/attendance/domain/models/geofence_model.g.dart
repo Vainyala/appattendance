@@ -8,7 +8,7 @@ part of 'geofence_model.dart';
 
 _$GeofenceModelImpl _$$GeofenceModelImplFromJson(Map<String, dynamic> json) =>
     _$GeofenceModelImpl(
-      id: json['id'] as String,
+      geoId: json['geoId'] as String,
       name: json['name'] as String,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),
@@ -25,7 +25,7 @@ _$GeofenceModelImpl _$$GeofenceModelImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$GeofenceModelImplToJson(_$GeofenceModelImpl instance) =>
     <String, dynamic>{
-      'id': instance.id,
+      'geoId': instance.geoId,
       'name': instance.name,
       'latitude': instance.latitude,
       'longitude': instance.longitude,

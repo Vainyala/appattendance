@@ -24,20 +24,25 @@ mixin _$AttendanceModel {
   String get attId => throw _privateConstructorUsedError; // att_id (PK)
   String get empId => throw _privateConstructorUsedError; // emp_id (FK)
   DateTime get timestamp => throw _privateConstructorUsedError; // att_timestamp
-  double? get latitude => throw _privateConstructorUsedError; // att_latitude
-  double? get longitude => throw _privateConstructorUsedError; // att_longitude
-  String? get geofenceName =>
-      throw _privateConstructorUsedError; // att_geofence_name
-  String? get projectId =>
-      throw _privateConstructorUsedError; // project_id (FK)
-  String? get notes => throw _privateConstructorUsedError; // att_notes
-  AttendanceStatus get status =>
-      throw _privateConstructorUsedError; // att_status
-  VerificationType? get verificationType =>
-      throw _privateConstructorUsedError; // verification_type
-  bool get isVerified =>
-      throw _privateConstructorUsedError; // is_verified (0/1 → bool)
-  DateTime? get createdAt => throw _privateConstructorUsedError; // created_at
+  DateTime get attendanceDate =>
+      throw _privateConstructorUsedError; // NEW: att_date (separate for daily grouping)
+  DateTime? get checkInTime =>
+      throw _privateConstructorUsedError; // NEW: check_in_time (for accurate late/duration)
+  DateTime? get checkOutTime =>
+      throw _privateConstructorUsedError; // NEW: check_out_time
+  double? get latitude => throw _privateConstructorUsedError;
+  double? get longitude => throw _privateConstructorUsedError;
+  String? get geofenceName => throw _privateConstructorUsedError;
+  String? get projectId => throw _privateConstructorUsedError;
+  String? get notes => throw _privateConstructorUsedError;
+  AttendanceStatus get status => throw _privateConstructorUsedError;
+  VerificationType? get verificationType => throw _privateConstructorUsedError;
+  bool get isVerified => throw _privateConstructorUsedError;
+  String? get leaveType =>
+      throw _privateConstructorUsedError; // NEW: 'casual', 'sick', null if no leave
+  String? get photoProofPath =>
+      throw _privateConstructorUsedError; // Optional future field
+  DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this AttendanceModel to a JSON map.
@@ -61,6 +66,9 @@ abstract class $AttendanceModelCopyWith<$Res> {
     String attId,
     String empId,
     DateTime timestamp,
+    DateTime attendanceDate,
+    DateTime? checkInTime,
+    DateTime? checkOutTime,
     double? latitude,
     double? longitude,
     String? geofenceName,
@@ -69,6 +77,8 @@ abstract class $AttendanceModelCopyWith<$Res> {
     AttendanceStatus status,
     VerificationType? verificationType,
     bool isVerified,
+    String? leaveType,
+    String? photoProofPath,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -92,6 +102,9 @@ class _$AttendanceModelCopyWithImpl<$Res, $Val extends AttendanceModel>
     Object? attId = null,
     Object? empId = null,
     Object? timestamp = null,
+    Object? attendanceDate = null,
+    Object? checkInTime = freezed,
+    Object? checkOutTime = freezed,
     Object? latitude = freezed,
     Object? longitude = freezed,
     Object? geofenceName = freezed,
@@ -100,6 +113,8 @@ class _$AttendanceModelCopyWithImpl<$Res, $Val extends AttendanceModel>
     Object? status = null,
     Object? verificationType = freezed,
     Object? isVerified = null,
+    Object? leaveType = freezed,
+    Object? photoProofPath = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -117,6 +132,18 @@ class _$AttendanceModelCopyWithImpl<$Res, $Val extends AttendanceModel>
                 ? _value.timestamp
                 : timestamp // ignore: cast_nullable_to_non_nullable
                       as DateTime,
+            attendanceDate: null == attendanceDate
+                ? _value.attendanceDate
+                : attendanceDate // ignore: cast_nullable_to_non_nullable
+                      as DateTime,
+            checkInTime: freezed == checkInTime
+                ? _value.checkInTime
+                : checkInTime // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
+            checkOutTime: freezed == checkOutTime
+                ? _value.checkOutTime
+                : checkOutTime // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
             latitude: freezed == latitude
                 ? _value.latitude
                 : latitude // ignore: cast_nullable_to_non_nullable
@@ -149,6 +176,14 @@ class _$AttendanceModelCopyWithImpl<$Res, $Val extends AttendanceModel>
                 ? _value.isVerified
                 : isVerified // ignore: cast_nullable_to_non_nullable
                       as bool,
+            leaveType: freezed == leaveType
+                ? _value.leaveType
+                : leaveType // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            photoProofPath: freezed == photoProofPath
+                ? _value.photoProofPath
+                : photoProofPath // ignore: cast_nullable_to_non_nullable
+                      as String?,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -176,6 +211,9 @@ abstract class _$$AttendanceModelImplCopyWith<$Res>
     String attId,
     String empId,
     DateTime timestamp,
+    DateTime attendanceDate,
+    DateTime? checkInTime,
+    DateTime? checkOutTime,
     double? latitude,
     double? longitude,
     String? geofenceName,
@@ -184,6 +222,8 @@ abstract class _$$AttendanceModelImplCopyWith<$Res>
     AttendanceStatus status,
     VerificationType? verificationType,
     bool isVerified,
+    String? leaveType,
+    String? photoProofPath,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -206,6 +246,9 @@ class __$$AttendanceModelImplCopyWithImpl<$Res>
     Object? attId = null,
     Object? empId = null,
     Object? timestamp = null,
+    Object? attendanceDate = null,
+    Object? checkInTime = freezed,
+    Object? checkOutTime = freezed,
     Object? latitude = freezed,
     Object? longitude = freezed,
     Object? geofenceName = freezed,
@@ -214,6 +257,8 @@ class __$$AttendanceModelImplCopyWithImpl<$Res>
     Object? status = null,
     Object? verificationType = freezed,
     Object? isVerified = null,
+    Object? leaveType = freezed,
+    Object? photoProofPath = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -231,6 +276,18 @@ class __$$AttendanceModelImplCopyWithImpl<$Res>
             ? _value.timestamp
             : timestamp // ignore: cast_nullable_to_non_nullable
                   as DateTime,
+        attendanceDate: null == attendanceDate
+            ? _value.attendanceDate
+            : attendanceDate // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        checkInTime: freezed == checkInTime
+            ? _value.checkInTime
+            : checkInTime // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        checkOutTime: freezed == checkOutTime
+            ? _value.checkOutTime
+            : checkOutTime // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         latitude: freezed == latitude
             ? _value.latitude
             : latitude // ignore: cast_nullable_to_non_nullable
@@ -263,6 +320,14 @@ class __$$AttendanceModelImplCopyWithImpl<$Res>
             ? _value.isVerified
             : isVerified // ignore: cast_nullable_to_non_nullable
                   as bool,
+        leaveType: freezed == leaveType
+            ? _value.leaveType
+            : leaveType // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        photoProofPath: freezed == photoProofPath
+            ? _value.photoProofPath
+            : photoProofPath // ignore: cast_nullable_to_non_nullable
+                  as String?,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -283,6 +348,9 @@ class _$AttendanceModelImpl extends _AttendanceModel {
     required this.attId,
     required this.empId,
     required this.timestamp,
+    required this.attendanceDate,
+    this.checkInTime,
+    this.checkOutTime,
     this.latitude,
     this.longitude,
     this.geofenceName,
@@ -291,6 +359,8 @@ class _$AttendanceModelImpl extends _AttendanceModel {
     required this.status,
     this.verificationType,
     this.isVerified = false,
+    this.leaveType,
+    this.photoProofPath,
     this.createdAt,
     this.updatedAt,
   }) : super._();
@@ -308,39 +378,45 @@ class _$AttendanceModelImpl extends _AttendanceModel {
   final DateTime timestamp;
   // att_timestamp
   @override
+  final DateTime attendanceDate;
+  // NEW: att_date (separate for daily grouping)
+  @override
+  final DateTime? checkInTime;
+  // NEW: check_in_time (for accurate late/duration)
+  @override
+  final DateTime? checkOutTime;
+  // NEW: check_out_time
+  @override
   final double? latitude;
-  // att_latitude
   @override
   final double? longitude;
-  // att_longitude
   @override
   final String? geofenceName;
-  // att_geofence_name
   @override
   final String? projectId;
-  // project_id (FK)
   @override
   final String? notes;
-  // att_notes
   @override
   final AttendanceStatus status;
-  // att_status
   @override
   final VerificationType? verificationType;
-  // verification_type
   @override
   @JsonKey()
   final bool isVerified;
-  // is_verified (0/1 → bool)
+  @override
+  final String? leaveType;
+  // NEW: 'casual', 'sick', null if no leave
+  @override
+  final String? photoProofPath;
+  // Optional future field
   @override
   final DateTime? createdAt;
-  // created_at
   @override
   final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'AttendanceModel(attId: $attId, empId: $empId, timestamp: $timestamp, latitude: $latitude, longitude: $longitude, geofenceName: $geofenceName, projectId: $projectId, notes: $notes, status: $status, verificationType: $verificationType, isVerified: $isVerified, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'AttendanceModel(attId: $attId, empId: $empId, timestamp: $timestamp, attendanceDate: $attendanceDate, checkInTime: $checkInTime, checkOutTime: $checkOutTime, latitude: $latitude, longitude: $longitude, geofenceName: $geofenceName, projectId: $projectId, notes: $notes, status: $status, verificationType: $verificationType, isVerified: $isVerified, leaveType: $leaveType, photoProofPath: $photoProofPath, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -352,6 +428,12 @@ class _$AttendanceModelImpl extends _AttendanceModel {
             (identical(other.empId, empId) || other.empId == empId) &&
             (identical(other.timestamp, timestamp) ||
                 other.timestamp == timestamp) &&
+            (identical(other.attendanceDate, attendanceDate) ||
+                other.attendanceDate == attendanceDate) &&
+            (identical(other.checkInTime, checkInTime) ||
+                other.checkInTime == checkInTime) &&
+            (identical(other.checkOutTime, checkOutTime) ||
+                other.checkOutTime == checkOutTime) &&
             (identical(other.latitude, latitude) ||
                 other.latitude == latitude) &&
             (identical(other.longitude, longitude) ||
@@ -366,6 +448,10 @@ class _$AttendanceModelImpl extends _AttendanceModel {
                 other.verificationType == verificationType) &&
             (identical(other.isVerified, isVerified) ||
                 other.isVerified == isVerified) &&
+            (identical(other.leaveType, leaveType) ||
+                other.leaveType == leaveType) &&
+            (identical(other.photoProofPath, photoProofPath) ||
+                other.photoProofPath == photoProofPath) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -379,6 +465,9 @@ class _$AttendanceModelImpl extends _AttendanceModel {
     attId,
     empId,
     timestamp,
+    attendanceDate,
+    checkInTime,
+    checkOutTime,
     latitude,
     longitude,
     geofenceName,
@@ -387,6 +476,8 @@ class _$AttendanceModelImpl extends _AttendanceModel {
     status,
     verificationType,
     isVerified,
+    leaveType,
+    photoProofPath,
     createdAt,
     updatedAt,
   );
@@ -413,6 +504,9 @@ abstract class _AttendanceModel extends AttendanceModel {
     required final String attId,
     required final String empId,
     required final DateTime timestamp,
+    required final DateTime attendanceDate,
+    final DateTime? checkInTime,
+    final DateTime? checkOutTime,
     final double? latitude,
     final double? longitude,
     final String? geofenceName,
@@ -421,6 +515,8 @@ abstract class _AttendanceModel extends AttendanceModel {
     required final AttendanceStatus status,
     final VerificationType? verificationType,
     final bool isVerified,
+    final String? leaveType,
+    final String? photoProofPath,
     final DateTime? createdAt,
     final DateTime? updatedAt,
   }) = _$AttendanceModelImpl;
@@ -436,23 +532,33 @@ abstract class _AttendanceModel extends AttendanceModel {
   @override
   DateTime get timestamp; // att_timestamp
   @override
-  double? get latitude; // att_latitude
+  DateTime get attendanceDate; // NEW: att_date (separate for daily grouping)
   @override
-  double? get longitude; // att_longitude
+  DateTime? get checkInTime; // NEW: check_in_time (for accurate late/duration)
   @override
-  String? get geofenceName; // att_geofence_name
+  DateTime? get checkOutTime; // NEW: check_out_time
   @override
-  String? get projectId; // project_id (FK)
+  double? get latitude;
   @override
-  String? get notes; // att_notes
+  double? get longitude;
   @override
-  AttendanceStatus get status; // att_status
+  String? get geofenceName;
   @override
-  VerificationType? get verificationType; // verification_type
+  String? get projectId;
   @override
-  bool get isVerified; // is_verified (0/1 → bool)
+  String? get notes;
   @override
-  DateTime? get createdAt; // created_at
+  AttendanceStatus get status;
+  @override
+  VerificationType? get verificationType;
+  @override
+  bool get isVerified;
+  @override
+  String? get leaveType; // NEW: 'casual', 'sick', null if no leave
+  @override
+  String? get photoProofPath; // Optional future field
+  @override
+  DateTime? get createdAt;
   @override
   DateTime? get updatedAt;
 

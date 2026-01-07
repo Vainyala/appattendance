@@ -21,7 +21,7 @@ ProjectModel _$ProjectModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$ProjectModel {
-  String get projectId => throw _privateConstructorUsedError; // PK
+  String get projectId => throw _privateConstructorUsedError;
   String get orgShortName => throw _privateConstructorUsedError;
   String get projectName => throw _privateConstructorUsedError;
   String? get projectSite => throw _privateConstructorUsedError;
@@ -34,6 +34,25 @@ mixin _$ProjectModel {
   String? get projectDescription => throw _privateConstructorUsedError;
   String? get projectTechstack => throw _privateConstructorUsedError;
   String? get projectAssignedDate => throw _privateConstructorUsedError;
+  String? get estdStartDate =>
+      throw _privateConstructorUsedError; // ← New field from dummy
+  String? get estdEndDate =>
+      throw _privateConstructorUsedError; // ← New field from dummy
+  String? get estdEffort =>
+      throw _privateConstructorUsedError; // ← New field from dummy
+  String? get estdCost =>
+      throw _privateConstructorUsedError; // ← New field from dummy
+  ProjectStatus get status => throw _privateConstructorUsedError;
+  ProjectPriority get priority => throw _privateConstructorUsedError;
+  double get progress => throw _privateConstructorUsedError;
+  int get teamSize => throw _privateConstructorUsedError;
+  int get totalTasks => throw _privateConstructorUsedError;
+  int get completedTasks => throw _privateConstructorUsedError;
+  int get daysLeft => throw _privateConstructorUsedError;
+  List<String> get teamMemberIds => throw _privateConstructorUsedError;
+  List<String> get teamMemberNames => throw _privateConstructorUsedError;
+  DateTime? get startDate => throw _privateConstructorUsedError;
+  DateTime? get endDate => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -68,6 +87,21 @@ abstract class $ProjectModelCopyWith<$Res> {
     String? projectDescription,
     String? projectTechstack,
     String? projectAssignedDate,
+    String? estdStartDate,
+    String? estdEndDate,
+    String? estdEffort,
+    String? estdCost,
+    ProjectStatus status,
+    ProjectPriority priority,
+    double progress,
+    int teamSize,
+    int totalTasks,
+    int completedTasks,
+    int daysLeft,
+    List<String> teamMemberIds,
+    List<String> teamMemberNames,
+    DateTime? startDate,
+    DateTime? endDate,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -101,6 +135,21 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
     Object? projectDescription = freezed,
     Object? projectTechstack = freezed,
     Object? projectAssignedDate = freezed,
+    Object? estdStartDate = freezed,
+    Object? estdEndDate = freezed,
+    Object? estdEffort = freezed,
+    Object? estdCost = freezed,
+    Object? status = null,
+    Object? priority = null,
+    Object? progress = null,
+    Object? teamSize = null,
+    Object? totalTasks = null,
+    Object? completedTasks = null,
+    Object? daysLeft = null,
+    Object? teamMemberIds = null,
+    Object? teamMemberNames = null,
+    Object? startDate = freezed,
+    Object? endDate = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -158,6 +207,66 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
                 ? _value.projectAssignedDate
                 : projectAssignedDate // ignore: cast_nullable_to_non_nullable
                       as String?,
+            estdStartDate: freezed == estdStartDate
+                ? _value.estdStartDate
+                : estdStartDate // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            estdEndDate: freezed == estdEndDate
+                ? _value.estdEndDate
+                : estdEndDate // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            estdEffort: freezed == estdEffort
+                ? _value.estdEffort
+                : estdEffort // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            estdCost: freezed == estdCost
+                ? _value.estdCost
+                : estdCost // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            status: null == status
+                ? _value.status
+                : status // ignore: cast_nullable_to_non_nullable
+                      as ProjectStatus,
+            priority: null == priority
+                ? _value.priority
+                : priority // ignore: cast_nullable_to_non_nullable
+                      as ProjectPriority,
+            progress: null == progress
+                ? _value.progress
+                : progress // ignore: cast_nullable_to_non_nullable
+                      as double,
+            teamSize: null == teamSize
+                ? _value.teamSize
+                : teamSize // ignore: cast_nullable_to_non_nullable
+                      as int,
+            totalTasks: null == totalTasks
+                ? _value.totalTasks
+                : totalTasks // ignore: cast_nullable_to_non_nullable
+                      as int,
+            completedTasks: null == completedTasks
+                ? _value.completedTasks
+                : completedTasks // ignore: cast_nullable_to_non_nullable
+                      as int,
+            daysLeft: null == daysLeft
+                ? _value.daysLeft
+                : daysLeft // ignore: cast_nullable_to_non_nullable
+                      as int,
+            teamMemberIds: null == teamMemberIds
+                ? _value.teamMemberIds
+                : teamMemberIds // ignore: cast_nullable_to_non_nullable
+                      as List<String>,
+            teamMemberNames: null == teamMemberNames
+                ? _value.teamMemberNames
+                : teamMemberNames // ignore: cast_nullable_to_non_nullable
+                      as List<String>,
+            startDate: freezed == startDate
+                ? _value.startDate
+                : startDate // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
+            endDate: freezed == endDate
+                ? _value.endDate
+                : endDate // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
             createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
@@ -195,6 +304,21 @@ abstract class _$$ProjectModelImplCopyWith<$Res>
     String? projectDescription,
     String? projectTechstack,
     String? projectAssignedDate,
+    String? estdStartDate,
+    String? estdEndDate,
+    String? estdEffort,
+    String? estdCost,
+    ProjectStatus status,
+    ProjectPriority priority,
+    double progress,
+    int teamSize,
+    int totalTasks,
+    int completedTasks,
+    int daysLeft,
+    List<String> teamMemberIds,
+    List<String> teamMemberNames,
+    DateTime? startDate,
+    DateTime? endDate,
     DateTime? createdAt,
     DateTime? updatedAt,
   });
@@ -227,6 +351,21 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
     Object? projectDescription = freezed,
     Object? projectTechstack = freezed,
     Object? projectAssignedDate = freezed,
+    Object? estdStartDate = freezed,
+    Object? estdEndDate = freezed,
+    Object? estdEffort = freezed,
+    Object? estdCost = freezed,
+    Object? status = null,
+    Object? priority = null,
+    Object? progress = null,
+    Object? teamSize = null,
+    Object? totalTasks = null,
+    Object? completedTasks = null,
+    Object? daysLeft = null,
+    Object? teamMemberIds = null,
+    Object? teamMemberNames = null,
+    Object? startDate = freezed,
+    Object? endDate = freezed,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
   }) {
@@ -284,6 +423,66 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
             ? _value.projectAssignedDate
             : projectAssignedDate // ignore: cast_nullable_to_non_nullable
                   as String?,
+        estdStartDate: freezed == estdStartDate
+            ? _value.estdStartDate
+            : estdStartDate // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        estdEndDate: freezed == estdEndDate
+            ? _value.estdEndDate
+            : estdEndDate // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        estdEffort: freezed == estdEffort
+            ? _value.estdEffort
+            : estdEffort // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        estdCost: freezed == estdCost
+            ? _value.estdCost
+            : estdCost // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        status: null == status
+            ? _value.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as ProjectStatus,
+        priority: null == priority
+            ? _value.priority
+            : priority // ignore: cast_nullable_to_non_nullable
+                  as ProjectPriority,
+        progress: null == progress
+            ? _value.progress
+            : progress // ignore: cast_nullable_to_non_nullable
+                  as double,
+        teamSize: null == teamSize
+            ? _value.teamSize
+            : teamSize // ignore: cast_nullable_to_non_nullable
+                  as int,
+        totalTasks: null == totalTasks
+            ? _value.totalTasks
+            : totalTasks // ignore: cast_nullable_to_non_nullable
+                  as int,
+        completedTasks: null == completedTasks
+            ? _value.completedTasks
+            : completedTasks // ignore: cast_nullable_to_non_nullable
+                  as int,
+        daysLeft: null == daysLeft
+            ? _value.daysLeft
+            : daysLeft // ignore: cast_nullable_to_non_nullable
+                  as int,
+        teamMemberIds: null == teamMemberIds
+            ? _value._teamMemberIds
+            : teamMemberIds // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
+        teamMemberNames: null == teamMemberNames
+            ? _value._teamMemberNames
+            : teamMemberNames // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
+        startDate: freezed == startDate
+            ? _value.startDate
+            : startDate // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        endDate: freezed == endDate
+            ? _value.endDate
+            : endDate // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
         createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
@@ -314,16 +513,32 @@ class _$ProjectModelImpl extends _ProjectModel {
     this.projectDescription,
     this.projectTechstack,
     this.projectAssignedDate,
+    this.estdStartDate,
+    this.estdEndDate,
+    this.estdEffort,
+    this.estdCost,
+    this.status = ProjectStatus.active,
+    this.priority = ProjectPriority.high,
+    this.progress = 0.0,
+    this.teamSize = 0,
+    this.totalTasks = 0,
+    this.completedTasks = 0,
+    this.daysLeft = 0,
+    final List<String> teamMemberIds = const [],
+    final List<String> teamMemberNames = const [],
+    this.startDate,
+    this.endDate,
     this.createdAt,
     this.updatedAt,
-  }) : super._();
+  }) : _teamMemberIds = teamMemberIds,
+       _teamMemberNames = teamMemberNames,
+       super._();
 
   factory _$ProjectModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$ProjectModelImplFromJson(json);
 
   @override
   final String projectId;
-  // PK
   @override
   final String orgShortName;
   @override
@@ -349,13 +564,68 @@ class _$ProjectModelImpl extends _ProjectModel {
   @override
   final String? projectAssignedDate;
   @override
+  final String? estdStartDate;
+  // ← New field from dummy
+  @override
+  final String? estdEndDate;
+  // ← New field from dummy
+  @override
+  final String? estdEffort;
+  // ← New field from dummy
+  @override
+  final String? estdCost;
+  // ← New field from dummy
+  @override
+  @JsonKey()
+  final ProjectStatus status;
+  @override
+  @JsonKey()
+  final ProjectPriority priority;
+  @override
+  @JsonKey()
+  final double progress;
+  @override
+  @JsonKey()
+  final int teamSize;
+  @override
+  @JsonKey()
+  final int totalTasks;
+  @override
+  @JsonKey()
+  final int completedTasks;
+  @override
+  @JsonKey()
+  final int daysLeft;
+  final List<String> _teamMemberIds;
+  @override
+  @JsonKey()
+  List<String> get teamMemberIds {
+    if (_teamMemberIds is EqualUnmodifiableListView) return _teamMemberIds;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_teamMemberIds);
+  }
+
+  final List<String> _teamMemberNames;
+  @override
+  @JsonKey()
+  List<String> get teamMemberNames {
+    if (_teamMemberNames is EqualUnmodifiableListView) return _teamMemberNames;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_teamMemberNames);
+  }
+
+  @override
+  final DateTime? startDate;
+  @override
+  final DateTime? endDate;
+  @override
   final DateTime? createdAt;
   @override
   final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'ProjectModel(projectId: $projectId, orgShortName: $orgShortName, projectName: $projectName, projectSite: $projectSite, clientName: $clientName, clientLocation: $clientLocation, clientContact: $clientContact, mngName: $mngName, mngEmail: $mngEmail, mngContact: $mngContact, projectDescription: $projectDescription, projectTechstack: $projectTechstack, projectAssignedDate: $projectAssignedDate, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'ProjectModel(projectId: $projectId, orgShortName: $orgShortName, projectName: $projectName, projectSite: $projectSite, clientName: $clientName, clientLocation: $clientLocation, clientContact: $clientContact, mngName: $mngName, mngEmail: $mngEmail, mngContact: $mngContact, projectDescription: $projectDescription, projectTechstack: $projectTechstack, projectAssignedDate: $projectAssignedDate, estdStartDate: $estdStartDate, estdEndDate: $estdEndDate, estdEffort: $estdEffort, estdCost: $estdCost, status: $status, priority: $priority, progress: $progress, teamSize: $teamSize, totalTasks: $totalTasks, completedTasks: $completedTasks, daysLeft: $daysLeft, teamMemberIds: $teamMemberIds, teamMemberNames: $teamMemberNames, startDate: $startDate, endDate: $endDate, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -388,6 +658,38 @@ class _$ProjectModelImpl extends _ProjectModel {
                 other.projectTechstack == projectTechstack) &&
             (identical(other.projectAssignedDate, projectAssignedDate) ||
                 other.projectAssignedDate == projectAssignedDate) &&
+            (identical(other.estdStartDate, estdStartDate) ||
+                other.estdStartDate == estdStartDate) &&
+            (identical(other.estdEndDate, estdEndDate) ||
+                other.estdEndDate == estdEndDate) &&
+            (identical(other.estdEffort, estdEffort) ||
+                other.estdEffort == estdEffort) &&
+            (identical(other.estdCost, estdCost) ||
+                other.estdCost == estdCost) &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.priority, priority) ||
+                other.priority == priority) &&
+            (identical(other.progress, progress) ||
+                other.progress == progress) &&
+            (identical(other.teamSize, teamSize) ||
+                other.teamSize == teamSize) &&
+            (identical(other.totalTasks, totalTasks) ||
+                other.totalTasks == totalTasks) &&
+            (identical(other.completedTasks, completedTasks) ||
+                other.completedTasks == completedTasks) &&
+            (identical(other.daysLeft, daysLeft) ||
+                other.daysLeft == daysLeft) &&
+            const DeepCollectionEquality().equals(
+              other._teamMemberIds,
+              _teamMemberIds,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._teamMemberNames,
+              _teamMemberNames,
+            ) &&
+            (identical(other.startDate, startDate) ||
+                other.startDate == startDate) &&
+            (identical(other.endDate, endDate) || other.endDate == endDate) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -396,7 +698,7 @@ class _$ProjectModelImpl extends _ProjectModel {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     projectId,
     orgShortName,
@@ -411,9 +713,24 @@ class _$ProjectModelImpl extends _ProjectModel {
     projectDescription,
     projectTechstack,
     projectAssignedDate,
+    estdStartDate,
+    estdEndDate,
+    estdEffort,
+    estdCost,
+    status,
+    priority,
+    progress,
+    teamSize,
+    totalTasks,
+    completedTasks,
+    daysLeft,
+    const DeepCollectionEquality().hash(_teamMemberIds),
+    const DeepCollectionEquality().hash(_teamMemberNames),
+    startDate,
+    endDate,
     createdAt,
     updatedAt,
-  );
+  ]);
 
   /// Create a copy of ProjectModel
   /// with the given fields replaced by the non-null parameter values.
@@ -444,6 +761,21 @@ abstract class _ProjectModel extends ProjectModel {
     final String? projectDescription,
     final String? projectTechstack,
     final String? projectAssignedDate,
+    final String? estdStartDate,
+    final String? estdEndDate,
+    final String? estdEffort,
+    final String? estdCost,
+    final ProjectStatus status,
+    final ProjectPriority priority,
+    final double progress,
+    final int teamSize,
+    final int totalTasks,
+    final int completedTasks,
+    final int daysLeft,
+    final List<String> teamMemberIds,
+    final List<String> teamMemberNames,
+    final DateTime? startDate,
+    final DateTime? endDate,
     final DateTime? createdAt,
     final DateTime? updatedAt,
   }) = _$ProjectModelImpl;
@@ -453,7 +785,7 @@ abstract class _ProjectModel extends ProjectModel {
       _$ProjectModelImpl.fromJson;
 
   @override
-  String get projectId; // PK
+  String get projectId;
   @override
   String get orgShortName;
   @override
@@ -479,6 +811,36 @@ abstract class _ProjectModel extends ProjectModel {
   @override
   String? get projectAssignedDate;
   @override
+  String? get estdStartDate; // ← New field from dummy
+  @override
+  String? get estdEndDate; // ← New field from dummy
+  @override
+  String? get estdEffort; // ← New field from dummy
+  @override
+  String? get estdCost; // ← New field from dummy
+  @override
+  ProjectStatus get status;
+  @override
+  ProjectPriority get priority;
+  @override
+  double get progress;
+  @override
+  int get teamSize;
+  @override
+  int get totalTasks;
+  @override
+  int get completedTasks;
+  @override
+  int get daysLeft;
+  @override
+  List<String> get teamMemberIds;
+  @override
+  List<String> get teamMemberNames;
+  @override
+  DateTime? get startDate;
+  @override
+  DateTime? get endDate;
+  @override
   DateTime? get createdAt;
   @override
   DateTime? get updatedAt;
@@ -499,8 +861,7 @@ MappedProject _$MappedProjectFromJson(Map<String, dynamic> json) {
 mixin _$MappedProject {
   String get empId => throw _privateConstructorUsedError;
   String get projectId => throw _privateConstructorUsedError;
-  String get mappingStatus =>
-      throw _privateConstructorUsedError; // 'active' / 'deactive'
+  String get mappingStatus => throw _privateConstructorUsedError;
   ProjectModel get project => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
@@ -693,7 +1054,6 @@ class _$MappedProjectImpl extends _MappedProject {
   final String projectId;
   @override
   final String mappingStatus;
-  // 'active' / 'deactive'
   @override
   final ProjectModel project;
   @override
@@ -768,7 +1128,7 @@ abstract class _MappedProject extends MappedProject {
   @override
   String get projectId;
   @override
-  String get mappingStatus; // 'active' / 'deactive'
+  String get mappingStatus;
   @override
   ProjectModel get project;
   @override

@@ -4,7 +4,9 @@
 // Current date: December 29, 2025
 
 import 'package:appattendance/core/utils/app_colors.dart';
+import 'package:appattendance/features/attendance/domain/models/attendance_model.dart';
 import 'package:appattendance/features/dashboard/presentation/providers/dashboard_notifier.dart';
+import 'package:appattendance/features/dashboard/presentation/widgets/common/custom_stat_row.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,7 +36,7 @@ class AttendanceBreakdownSection extends ConsumerWidget {
         return Column(
           children: [
             Card(
-              elevation: 8,
+              elevation: 500,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -91,7 +93,7 @@ class AttendanceBreakdownSection extends ConsumerWidget {
             const SizedBox(height: 16),
 
             Card(
-              elevation: 8,
+              elevation: 500,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -124,6 +126,7 @@ class AttendanceBreakdownSection extends ConsumerWidget {
                 ),
               ),
             ),
+            // CustomStatRow(String label, int value, Color color),
           ],
         );
       },
@@ -164,6 +167,16 @@ class AttendanceBreakdownSection extends ConsumerWidget {
       ],
     );
   }
+
+  // Widget CustomStatRow(String label, int value, Color color) {
+  //   return Row(
+  //     children: [
+  //       Icon(Icons.circle, color: color, size: 12),
+  //       SizedBox(width: 8),
+  //       Text('$label: $value'),
+  //     ],
+  //   );
+  // }
 }
 
 // import 'package:appattendance/features/dashboard/presentation/widgets/common/custom_stat_row.dart';

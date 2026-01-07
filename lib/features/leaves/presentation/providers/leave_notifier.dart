@@ -1,5 +1,8 @@
 // lib/features/leaves/presentation/providers/leave_notifier.dart
 import 'package:appattendance/features/auth/domain/models/user_model.dart';
+import 'package:appattendance/features/auth/domain/models/user_extension.dart';
+import 'package:appattendance/features/auth/domain/models/user_role.dart';
+import 'package:appattendance/features/auth/domain/models/user_db_mapper.dart';
 import 'package:appattendance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:appattendance/features/leaves/domain/models/leave_model.dart';
 import 'package:appattendance/features/leaves/presentation/providers/leave_provider.dart';
@@ -27,6 +30,10 @@ class MyLeavesNotifier extends StateNotifier<AsyncValue<List<LeaveModel>>> {
     } catch (e, stack) {
       state = AsyncError(e, stack);
     }
+  }
+
+  Future<void> refresh() async {
+    await loadLeaves(); // Just reload the data
   }
 
   Future<void> applyLeave(LeaveModel leave) async {

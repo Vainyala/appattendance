@@ -32,6 +32,8 @@ class AttendanceStatusWidget extends ConsumerWidget {
                 attId: '',
                 empId: '',
                 timestamp: DateTime.now(),
+                attendanceDate:
+                    DateTime.now(), // ← REQUIRED FIELD FIX: Add this line
                 status: AttendanceStatus.checkIn,
               ),
             )
@@ -44,6 +46,8 @@ class AttendanceStatusWidget extends ConsumerWidget {
                 attId: '',
                 empId: '',
                 timestamp: DateTime.now(),
+                attendanceDate:
+                    DateTime.now(), // ← REQUIRED FIELD FIX: Add this line
                 status: AttendanceStatus.checkOut,
               ),
             )

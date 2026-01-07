@@ -5,7 +5,11 @@
 // Current date: December 29, 2025
 
 import 'package:appattendance/core/utils/app_colors.dart';
+import 'package:appattendance/features/attendance/presentation/screens/attendance_screen.dart';
 import 'package:appattendance/features/auth/domain/models/user_model.dart';
+import 'package:appattendance/features/auth/domain/models/user_extension.dart';
+import 'package:appattendance/features/auth/domain/models/user_role.dart';
+import 'package:appattendance/features/auth/domain/models/user_db_mapper.dart';
 import 'package:flutter/material.dart';
 
 class ManagerQuickActions extends StatelessWidget {
@@ -28,13 +32,13 @@ class ManagerQuickActions extends StatelessWidget {
     if (user!.canViewTeamAttendance) {
       actions.add({
         'title': 'Team Attendance',
-        'subtitle': 'View & manage daily attendance',
+        'subtitle': '',
         'icon': Icons.assignment_turned_in_rounded,
         'color': Colors.blue,
         'onTap': () {
-          // TODO: Navigate to Team Attendance Screen
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Team Attendance clicked")),
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const AttendanceScreen()),
           );
         },
       });
@@ -44,7 +48,7 @@ class ManagerQuickActions extends StatelessWidget {
     if (user!.canViewTeamAttendance) {
       actions.add({
         'title': 'Team Members',
-        'subtitle': 'View team details & performance',
+        'subtitle': '',
         'icon': Icons.people_alt_rounded,
         'color': Colors.cyan,
         'onTap': () {
@@ -56,45 +60,13 @@ class ManagerQuickActions extends StatelessWidget {
       });
     }
 
-    // Pending Leaves Approval (R06 HR + R01 Admin)
-    if (user!.canApproveLeaves) {
-      actions.add({
-        'title': 'Pending Leaves',
-        'subtitle': 'Approve/Reject leave requests',
-        'icon': Icons.beach_access_rounded,
-        'color': Colors.orange,
-        'onTap': () {
-          // TODO: Navigate to Pending Leaves Screen
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Pending Leaves clicked")),
-          );
-        },
-      });
-    }
-
-    // Regularisation Approval (R03-R08 + R01)
-    if (user!.canApproveRegularisation) {
-      actions.add({
-        'title': 'Regularisations',
-        'subtitle': 'Approve/Reject attendance corrections',
-        'icon': Icons.edit_calendar_rounded,
-        'color': Colors.purple,
-        'onTap': () {
-          // TODO: Navigate to Regularisation Approval Screen
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Regularisations clicked")),
-          );
-        },
-      });
-    }
-
     // Default fallback if no privileges match
     if (actions.isEmpty) {
       return const SizedBox.shrink();
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

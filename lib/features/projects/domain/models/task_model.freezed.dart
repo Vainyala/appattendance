@@ -25,9 +25,11 @@ mixin _$TaskModel {
   String get projectId => throw _privateConstructorUsedError;
   String get projectName => throw _privateConstructorUsedError;
   String get taskName => throw _privateConstructorUsedError;
-  String get type => throw _privateConstructorUsedError;
+  String get type =>
+      throw _privateConstructorUsedError; // e.g., Bug, Feature, Testing
   TaskPriority get priority => throw _privateConstructorUsedError;
-  DateTime get estEndDate => throw _privateConstructorUsedError;
+  DateTime get estEndDate =>
+      throw _privateConstructorUsedError; // Estimated end date
   DateTime? get actualEndDate => throw _privateConstructorUsedError;
   double get estEffortHrs => throw _privateConstructorUsedError;
   double? get actualEffortHrs => throw _privateConstructorUsedError;
@@ -38,7 +40,12 @@ mixin _$TaskModel {
   String? get managerComments => throw _privateConstructorUsedError;
   String? get notes => throw _privateConstructorUsedError;
   bool get billable => throw _privateConstructorUsedError;
-  List<AttachedFile> get attachedFiles => throw _privateConstructorUsedError;
+  List<AttachedFile> get attachedFiles =>
+      throw _privateConstructorUsedError; // NEW: Who is assigned (for manager view)
+  String? get assignedToEmpId => throw _privateConstructorUsedError;
+  String? get assignedToName => throw _privateConstructorUsedError;
+  DateTime? get createdAt => throw _privateConstructorUsedError;
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this TaskModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -74,6 +81,10 @@ abstract class $TaskModelCopyWith<$Res> {
     String? notes,
     bool billable,
     List<AttachedFile> attachedFiles,
+    String? assignedToEmpId,
+    String? assignedToName,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   });
 }
 
@@ -110,6 +121,10 @@ class _$TaskModelCopyWithImpl<$Res, $Val extends TaskModel>
     Object? notes = freezed,
     Object? billable = null,
     Object? attachedFiles = null,
+    Object? assignedToEmpId = freezed,
+    Object? assignedToName = freezed,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -185,6 +200,22 @@ class _$TaskModelCopyWithImpl<$Res, $Val extends TaskModel>
                 ? _value.attachedFiles
                 : attachedFiles // ignore: cast_nullable_to_non_nullable
                       as List<AttachedFile>,
+            assignedToEmpId: freezed == assignedToEmpId
+                ? _value.assignedToEmpId
+                : assignedToEmpId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            assignedToName: freezed == assignedToName
+                ? _value.assignedToName
+                : assignedToName // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            createdAt: freezed == createdAt
+                ? _value.createdAt
+                : createdAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
+            updatedAt: freezed == updatedAt
+                ? _value.updatedAt
+                : updatedAt // ignore: cast_nullable_to_non_nullable
+                      as DateTime?,
           )
           as $Val,
     );
@@ -219,6 +250,10 @@ abstract class _$$TaskModelImplCopyWith<$Res>
     String? notes,
     bool billable,
     List<AttachedFile> attachedFiles,
+    String? assignedToEmpId,
+    String? assignedToName,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   });
 }
 
@@ -254,6 +289,10 @@ class __$$TaskModelImplCopyWithImpl<$Res>
     Object? notes = freezed,
     Object? billable = null,
     Object? attachedFiles = null,
+    Object? assignedToEmpId = freezed,
+    Object? assignedToName = freezed,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(
       _$TaskModelImpl(
@@ -329,6 +368,22 @@ class __$$TaskModelImplCopyWithImpl<$Res>
             ? _value._attachedFiles
             : attachedFiles // ignore: cast_nullable_to_non_nullable
                   as List<AttachedFile>,
+        assignedToEmpId: freezed == assignedToEmpId
+            ? _value.assignedToEmpId
+            : assignedToEmpId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        assignedToName: freezed == assignedToName
+            ? _value.assignedToName
+            : assignedToName // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        createdAt: freezed == createdAt
+            ? _value.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        updatedAt: freezed == updatedAt
+            ? _value.updatedAt
+            : updatedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
       ),
     );
   }
@@ -336,7 +391,7 @@ class __$$TaskModelImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$TaskModelImpl implements _TaskModel {
+class _$TaskModelImpl extends _TaskModel {
   const _$TaskModelImpl({
     required this.taskId,
     required this.projectId,
@@ -356,7 +411,12 @@ class _$TaskModelImpl implements _TaskModel {
     this.notes,
     required this.billable,
     final List<AttachedFile> attachedFiles = const [],
-  }) : _attachedFiles = attachedFiles;
+    this.assignedToEmpId,
+    this.assignedToName,
+    this.createdAt,
+    this.updatedAt,
+  }) : _attachedFiles = attachedFiles,
+       super._();
 
   factory _$TaskModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$TaskModelImplFromJson(json);
@@ -371,10 +431,12 @@ class _$TaskModelImpl implements _TaskModel {
   final String taskName;
   @override
   final String type;
+  // e.g., Bug, Feature, Testing
   @override
   final TaskPriority priority;
   @override
   final DateTime estEndDate;
+  // Estimated end date
   @override
   final DateTime? actualEndDate;
   @override
@@ -404,9 +466,19 @@ class _$TaskModelImpl implements _TaskModel {
     return EqualUnmodifiableListView(_attachedFiles);
   }
 
+  // NEW: Who is assigned (for manager view)
+  @override
+  final String? assignedToEmpId;
+  @override
+  final String? assignedToName;
+  @override
+  final DateTime? createdAt;
+  @override
+  final DateTime? updatedAt;
+
   @override
   String toString() {
-    return 'TaskModel(taskId: $taskId, projectId: $projectId, projectName: $projectName, taskName: $taskName, type: $type, priority: $priority, estEndDate: $estEndDate, actualEndDate: $actualEndDate, estEffortHrs: $estEffortHrs, actualEffortHrs: $actualEffortHrs, status: $status, description: $description, deliverables: $deliverables, taskHistory: $taskHistory, managerComments: $managerComments, notes: $notes, billable: $billable, attachedFiles: $attachedFiles)';
+    return 'TaskModel(taskId: $taskId, projectId: $projectId, projectName: $projectName, taskName: $taskName, type: $type, priority: $priority, estEndDate: $estEndDate, actualEndDate: $actualEndDate, estEffortHrs: $estEffortHrs, actualEffortHrs: $actualEffortHrs, status: $status, description: $description, deliverables: $deliverables, taskHistory: $taskHistory, managerComments: $managerComments, notes: $notes, billable: $billable, attachedFiles: $attachedFiles, assignedToEmpId: $assignedToEmpId, assignedToName: $assignedToName, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -447,12 +519,20 @@ class _$TaskModelImpl implements _TaskModel {
             const DeepCollectionEquality().equals(
               other._attachedFiles,
               _attachedFiles,
-            ));
+            ) &&
+            (identical(other.assignedToEmpId, assignedToEmpId) ||
+                other.assignedToEmpId == assignedToEmpId) &&
+            (identical(other.assignedToName, assignedToName) ||
+                other.assignedToName == assignedToName) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt) &&
+            (identical(other.updatedAt, updatedAt) ||
+                other.updatedAt == updatedAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     taskId,
     projectId,
@@ -472,7 +552,11 @@ class _$TaskModelImpl implements _TaskModel {
     notes,
     billable,
     const DeepCollectionEquality().hash(_attachedFiles),
-  );
+    assignedToEmpId,
+    assignedToName,
+    createdAt,
+    updatedAt,
+  ]);
 
   /// Create a copy of TaskModel
   /// with the given fields replaced by the non-null parameter values.
@@ -488,7 +572,7 @@ class _$TaskModelImpl implements _TaskModel {
   }
 }
 
-abstract class _TaskModel implements TaskModel {
+abstract class _TaskModel extends TaskModel {
   const factory _TaskModel({
     required final String taskId,
     required final String projectId,
@@ -508,7 +592,12 @@ abstract class _TaskModel implements TaskModel {
     final String? notes,
     required final bool billable,
     final List<AttachedFile> attachedFiles,
+    final String? assignedToEmpId,
+    final String? assignedToName,
+    final DateTime? createdAt,
+    final DateTime? updatedAt,
   }) = _$TaskModelImpl;
+  const _TaskModel._() : super._();
 
   factory _TaskModel.fromJson(Map<String, dynamic> json) =
       _$TaskModelImpl.fromJson;
@@ -522,11 +611,11 @@ abstract class _TaskModel implements TaskModel {
   @override
   String get taskName;
   @override
-  String get type;
+  String get type; // e.g., Bug, Feature, Testing
   @override
   TaskPriority get priority;
   @override
-  DateTime get estEndDate;
+  DateTime get estEndDate; // Estimated end date
   @override
   DateTime? get actualEndDate;
   @override
@@ -548,7 +637,15 @@ abstract class _TaskModel implements TaskModel {
   @override
   bool get billable;
   @override
-  List<AttachedFile> get attachedFiles;
+  List<AttachedFile> get attachedFiles; // NEW: Who is assigned (for manager view)
+  @override
+  String? get assignedToEmpId;
+  @override
+  String? get assignedToName;
+  @override
+  DateTime? get createdAt;
+  @override
+  DateTime? get updatedAt;
 
   /// Create a copy of TaskModel
   /// with the given fields replaced by the non-null parameter values.

@@ -1,0 +1,9 @@
+export 'package:appattendance/features/dashboard/presentation/providers/dashboard_notifier.dart';
+export 'package:appattendance/features/dashboard/presentation/widgets/common/app_drawer.dart';
+export 'package:appattendance/features/dashboard/presentation/widgets/common/metrics_counter.dart';
+export 'package:appattendance/features/dashboard/presentation/widgets/common/present_dashboard_card_section.dart';
+export 'package:appattendance/features/dashboard/presentation/widgets/common/attendance_breakdown_section.dart';
+export 'package:appattendance/features/dashboard/presentation/widgets/employeewidgets/check_in_out.dart';
+export 'package:appattendance/features/dashboard/presentation/widgets/managerwidgets/manager_dashboard_content.dart';
+export 'package:appattendance/features/dashboard/presentation/widgets/employeewidgets/employee_dashboard_content.dart';
+export 'package:appattendance/features/dashboard/presentation/widgets/managerwidgets/manager_quick_actions.dart';

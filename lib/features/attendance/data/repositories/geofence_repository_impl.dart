@@ -17,7 +17,7 @@ class GeofenceRepositoryImpl implements GeofenceRepository {
     return rows
         .map(
           (row) => GeofenceModel(
-            id: row['id'] as String,
+            geoId: row['id'] as String,
             name: row['name'] as String,
             latitude: row['latitude'] as double,
             longitude: row['longitude'] as double,

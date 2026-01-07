@@ -1,12 +1,8 @@
 // lib/features/dashboard/presentation/widgets/common/present_dashboard_card_section.dart
-// Upgraded: Real data from DashboardNotifier + role-based
-// Uses AttendanceModel (isCheckIn, isLate) + UserModel.isManagerial
-// Loading/error + dynamic month stats + privileges safe
-// Current date: December 29, 2025
-
+import 'package:appattendance/core/providers/view_mode_provider.dart';
 import 'package:appattendance/core/utils/app_colors.dart';
 import 'package:appattendance/features/attendance/domain/models/attendance_model.dart';
-import 'package:appattendance/features/auth/domain/models/user_model.dart';
+import 'package:appattendance/features/auth/domain/models/user_extension.dart';
 import 'package:appattendance/features/dashboard/presentation/providers/dashboard_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,19 +14,19 @@ class PresentDashboardCardSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dashboardAsync = ref.watch(dashboardProvider);
+    final viewMode = ref.watch(viewModeProvider); // ← Yeh add karo
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // ViewMode ke basis pe effective role decide karo
+    final effectiveManagerial = viewMode == ViewMode.manager;
 
     return dashboardAsync.when(
       data: (state) {
         final user = state.user;
         if (user == null) return const SizedBox.shrink();
 
-        final isManagerial = user.isManagerial;
-        final todayAttendance = state.todayAttendance;
-
-        // Today's status
-        final hasCheckedIn = todayAttendance.any((a) => a.isCheckIn);
-        final hasCheckedOut = todayAttendance.any((a) => a.isCheckOut);
+        // Manager mode toggle ko respect karo (even if user is manager)
+        final showManagerView = effectiveManagerial && user.isManagerial;
 
         // Month stats (current month)
         final now = DateTime.now();
@@ -38,29 +34,25 @@ class PresentDashboardCardSection extends ConsumerWidget {
         final currentMonthStart = DateTime(now.year, now.month, 1);
         final nextMonthStart = DateTime(now.year, now.month + 1, 1);
 
-        int present = 0;
+        // Real data from state
+        final present = state.presentToday;
+        final teamSize = state.teamSize;
+        final absent = teamSize - present;
+
+        // TODO: Real pending leaves
+        final pendingLeaves = 3;
+
+        // Employee-specific stats
         int onTime = 0;
         int late = 0;
-        int leave = 0; // TODO: Real from employee_leaves
-
-        for (var record in todayAttendance) {
+        for (var record in state.todayAttendance) {
           if (record.isCheckIn) {
-            present++;
-            if (record.isLate) {
+            if (record.isLate)
               late++;
-            } else {
+            else
               onTime++;
-            }
           }
         }
-
-        final totalDaysInMonth = nextMonthStart
-            .subtract(const Duration(days: 1))
-            .day;
-        final absent = totalDaysInMonth - (present + leave);
-
-        // Manager extra stats
-        final pendingLeaves = 3; // TODO: Real pending leaves count
 
         Widget _statItem(String label, String value, IconData icon) {
           return Column(
@@ -102,16 +94,16 @@ class PresentDashboardCardSection extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // Text(
+                  //   showManagerView ? "Team Overview" : "My Attendance Summary",
+                  //   style: TextStyle(
+                  //     fontSize: 20,
+                  //     fontWeight: FontWeight.bold,
+                  //     color: isDark ? Colors.white : Colors.black87,
+                  //   ),
+                  // ),
                   Text(
-                    isManagerial ? "Team Overview" : "My Attendance Summary",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                  Text(
-                    monthYear,
+                    "Today, " + monthYear,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -123,38 +115,38 @@ class PresentDashboardCardSection extends ConsumerWidget {
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: isManagerial
+                children: showManagerView
                     ? [
                         _statItem(
                           "Team",
-                          state.teamSize.toString(),
+                          teamSize.toString(),
                           Icons.people_alt_rounded,
                         ),
                         _statItem(
                           "Present",
-                          state.presentToday.toString(),
+                          present.toString(),
                           Icons.verified_user_rounded,
                         ),
                         _statItem(
-                          "Pending Leaves",
+                          "Leaves",
                           pendingLeaves.toString(),
                           Icons.beach_access_rounded,
                         ),
                         _statItem(
                           "Absent",
-                          (state.teamSize - state.presentToday).toString(),
+                          absent.toString(),
                           Icons.person_off_rounded,
                         ),
                         _statItem(
-                          "Overall %",
-                          "${(state.presentToday / state.teamSize * 100).round()}%",
+                          "Overall Att. %",
+                          "${teamSize > 0 ? (present / teamSize * 100).round() : 0}%",
                           Icons.trending_up_rounded,
                         ),
                       ]
                     : [
                         _statItem(
                           "Total Days",
-                          totalDaysInMonth.toString(),
+                          "6",
                           Icons.calendar_today_rounded,
                         ),
                         _statItem(
@@ -163,14 +155,9 @@ class PresentDashboardCardSection extends ConsumerWidget {
                           Icons.check_circle_rounded,
                         ),
                         _statItem(
-                          "Leave",
-                          leave.toString(),
-                          Icons.beach_access_rounded,
-                        ),
-                        _statItem(
                           "Absent",
                           absent.toString(),
-                          Icons.cancel_rounded,
+                          Icons.hourglass_full_rounded,
                         ),
                         _statItem(
                           "On-Time",
@@ -182,6 +169,7 @@ class PresentDashboardCardSection extends ConsumerWidget {
                           late.toString(),
                           Icons.hourglass_full_rounded,
                         ),
+                        _statItem("Leave", "0", Icons.beach_access_rounded),
                       ],
               ),
               const SizedBox(height: 16),
@@ -191,11 +179,212 @@ class PresentDashboardCardSection extends ConsumerWidget {
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) =>
-          Center(child: Text("Error loading dashboard: $err")),
+      error: (err, stack) => Center(child: Text("Error loading stats: $err")),
     );
   }
 }
+
+// // lib/features/dashboard/presentation/widgets/common/present_dashboard_card_section.dart
+// // Upgraded: Real data from DashboardNotifier + role-based
+// // Uses AttendanceModel (isCheckIn, isLate) + UserModel.isManagerial
+// // Loading/error + dynamic month stats + privileges safe
+// // Current date: December 29, 2025
+
+// import 'package:appattendance/core/utils/app_colors.dart';
+// import 'package:appattendance/features/attendance/domain/models/attendance_model.dart';
+// import 'package:appattendance/features/auth/domain/models/user_model.dart';
+// import 'package:appattendance/features/auth/domain/models/user_extension.dart';
+// import 'package:appattendance/features/auth/domain/models/user_role.dart';
+// import 'package:appattendance/features/auth/domain/models/user_db_mapper.dart';
+// import 'package:appattendance/features/dashboard/presentation/providers/dashboard_notifier.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:intl/intl.dart';
+
+// class PresentDashboardCardSection extends ConsumerWidget {
+//   const PresentDashboardCardSection({super.key});
+
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+//     final dashboardAsync = ref.watch(dashboardProvider);
+//     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+//     return dashboardAsync.when(
+//       data: (state) {
+//         final user = state.user;
+//         if (user == null) return const SizedBox.shrink();
+
+//         final isManagerial = user.isManagerial;
+//         final todayAttendance = state.todayAttendance;
+
+//         // Today's status
+//         final hasCheckedIn = todayAttendance.any((a) => a.isCheckIn);
+//         final hasCheckedOut = todayAttendance.any((a) => a.isCheckOut);
+
+//         // Month stats (current month)
+//         final now = DateTime.now();
+//         final monthYear = DateFormat('MMMM yyyy').format(now);
+//         final currentMonthStart = DateTime(now.year, now.month, 1);
+//         final nextMonthStart = DateTime(now.year, now.month + 1, 1);
+
+//         int present = 0;
+//         int onTime = 0;
+//         int late = 0;
+//         int leave = 0; // TODO: Real from employee_leaves
+
+//         for (var record in todayAttendance) {
+//           if (record.isCheckIn) {
+//             present++;
+//             if (record.isLate) {
+//               late++;
+//             } else {
+//               onTime++;
+//             }
+//           }
+//         }
+
+//         final totalDaysInMonth = nextMonthStart
+//             .subtract(const Duration(days: 1))
+//             .day;
+//         final absent = totalDaysInMonth - (present + leave);
+
+//         // Manager extra stats
+//         final pendingLeaves = 3; // TODO: Real pending leaves count
+
+//         Widget _statItem(String label, String value, IconData icon) {
+//           return Column(
+//             children: [
+//               Container(
+//                 padding: const EdgeInsets.all(12),
+//                 decoration: BoxDecoration(
+//                   color: AppColors.primary.withOpacity(isDark ? 0.3 : 0.15),
+//                   shape: BoxShape.circle,
+//                 ),
+//                 child: Icon(icon, size: 28, color: AppColors.primary),
+//               ),
+//               const SizedBox(height: 8),
+//               Text(
+//                 value,
+//                 style: TextStyle(
+//                   fontSize: 22,
+//                   fontWeight: FontWeight.bold,
+//                   color: isDark ? Colors.white : Colors.black87,
+//                 ),
+//               ),
+//               const SizedBox(height: 4),
+//               Text(
+//                 label,
+//                 style: TextStyle(
+//                   fontSize: 13,
+//                   color: isDark ? Colors.white70 : Colors.grey[700],
+//                 ),
+//                 textAlign: TextAlign.center,
+//               ),
+//             ],
+//           );
+//         }
+
+//         return Container(
+//           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+//           child: Column(
+//             children: [
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                 children: [
+//                   Text(
+//                     isManagerial ? "Team Overview" : "My Attendance Summary",
+//                     style: TextStyle(
+//                       fontSize: 20,
+//                       fontWeight: FontWeight.bold,
+//                       color: isDark ? Colors.white : Colors.black87,
+//                     ),
+//                   ),
+//                   Text(
+//                     monthYear,
+//                     style: TextStyle(
+//                       fontSize: 16,
+//                       fontWeight: FontWeight.w600,
+//                       color: isDark ? Colors.white70 : Colors.grey[700],
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//               const SizedBox(height: 20),
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceAround,
+//                 children: isManagerial
+//                     ? [
+//                         _statItem(
+//                           "Team",
+//                           state.teamSize.toString(),
+//                           Icons.people_alt_rounded,
+//                         ),
+//                         _statItem(
+//                           "Present",
+//                           state.presentToday.toString(),
+//                           Icons.verified_user_rounded,
+//                         ),
+//                         _statItem(
+//                           "Pending Leaves",
+//                           pendingLeaves.toString(),
+//                           Icons.beach_access_rounded,
+//                         ),
+//                         _statItem(
+//                           "Absent",
+//                           (state.teamSize - state.presentToday).toString(),
+//                           Icons.person_off_rounded,
+//                         ),
+//                         _statItem(
+//                           "Overall %",
+//                           "${(state.presentToday / state.teamSize * 100).round()}%",
+//                           Icons.trending_up_rounded,
+//                         ),
+//                       ]
+//                     : [
+//                         _statItem(
+//                           "Total Days",
+//                           totalDaysInMonth.toString(),
+//                           Icons.calendar_today_rounded,
+//                         ),
+//                         _statItem(
+//                           "Present",
+//                           present.toString(),
+//                           Icons.check_circle_rounded,
+//                         ),
+//                         _statItem(
+//                           "Leave",
+//                           leave.toString(),
+//                           Icons.beach_access_rounded,
+//                         ),
+//                         _statItem(
+//                           "Absent",
+//                           absent.toString(),
+//                           Icons.cancel_rounded,
+//                         ),
+//                         _statItem(
+//                           "On-Time",
+//                           onTime.toString(),
+//                           Icons.access_time_rounded,
+//                         ),
+//                         _statItem(
+//                           "Late",
+//                           late.toString(),
+//                           Icons.hourglass_full_rounded,
+//                         ),
+//                       ],
+//               ),
+//               const SizedBox(height: 16),
+//               Divider(color: isDark ? Colors.white24 : Colors.grey[300]),
+//             ],
+//           ),
+//         );
+//       },
+//       loading: () => const Center(child: CircularProgressIndicator()),
+//       error: (err, stack) =>
+//           Center(child: Text("Error loading dashboard: $err")),
+//     );
+//   }
+// }
 
 // // lib/features/dashboard/presentation/widgets/common/present_dashboard_card_section.dart
 

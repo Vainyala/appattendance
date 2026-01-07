@@ -114,7 +114,7 @@
       "emp_id": "NUTANTEKE20250601",
       "org_short_name": "NUTANTEK",
       "emp_name": "Vainyala Samal",
-      "emp_email": "emp0@nutantek.com",
+      "emp_email": "emp1@nutantek.com",
       "emp_role": "Employee",
       "emp_department": "Mobile Development",
       "emp_phone": "9876543210",
@@ -127,7 +127,7 @@
       "emp_id": "NUTANTEKE20250602",
       "org_short_name": "NUTANTEK",
       "emp_name": "Amit Kumar",
-      "emp_email": "emp1@nutantek.com",
+      "emp_email": "emp2@nutantek.com",
       "emp_role": "Employee",
       "emp_department": "Mobile",
       "emp_phone": "9000000001",
@@ -1160,5 +1160,168 @@
       "created_at": "2025-12-29T10:00:00Z",
       "updated_at": "2025-12-29T10:00:00Z"
     }
+],
+"attendance_analytics": [
+  {
+    "analytics_id": "ANA20251231_001",
+    "emp_id": "NUTANTEKE20250601",
+    "att_date": "2025-12-29",
+    "att_type": "Present",
+    "first_checkin": "09:05",
+    "last_checkout": "18:00",
+    "worked_hrs": 8.92,
+    "shortfall_hrs": 0.08,
+    "on_time": true,
+    "late": false,
+    "created_at": "2025-12-31T18:30:00Z"
+  },
+  {
+    "analytics_id": "ANA20251230_001",
+    "emp_id": "NUTANTEKE20250601",
+    "att_date": "2025-12-30",
+    "att_type": "Late",
+    "first_checkin": "09:45",
+    "last_checkout": "18:15",
+    "worked_hrs": 8.5,
+    "shortfall_hrs": 0.5,
+    "on_time": false,
+    "late": true,
+    "created_at": "2025-12-30T18:30:00Z"
+  },
+  {
+    "analytics_id": "ANA20251229_001",
+    "emp_id": "NUTANTEKE20250602",
+    "att_date": "2025-12-29",
+    "att_type": "Absent",
+    "first_checkin": null,
+    "last_checkout": null,
+    "worked_hrs": 0.0,
+    "shortfall_hrs": 9.0,
+    "on_time": false,
+    "late": false,
+    "created_at": "2025-12-29T18:30:00Z"
+  },
+  {
+    "analytics_id": "ANA20251231_001",
+    "emp_id": "NUTANTEKE20250601",
+    "att_date": "2025-12-31",
+    "att_type": "Present",
+    "first_checkin": "09:05",
+    "last_checkout": "18:00",
+    "worked_hrs": 8.92,
+    "shortfall_hrs": 0.08,
+    "on_time": true,
+    "late": false,
+    "created_at": "2025-12-31T18:30:00Z"
+  },
+  {
+    "analytics_id": "ANA20251230_001",
+    "emp_id": "NUTANTEKE20250601",
+    "att_date": "2025-12-30",
+    "att_type": "Late",
+    "first_checkin": "09:45",
+    "last_checkout": "18:15",
+    "worked_hrs": 8.5,
+    "shortfall_hrs": 0.5,
+    "on_time": false,
+    "late": true,
+    "created_at": "2025-12-30T18:30:00Z"
+  },
+  {
+    "analytics_id": "ANA20251229_001",
+    "emp_id": "NUTANTEKE20250601",
+    "att_date": "2025-12-29",
+    "att_type": "Absent",
+    "first_checkin": null,
+    "last_checkout": null,
+    "worked_hrs": 0.0,
+    "shortfall_hrs": 9.0,
+    "on_time": false,
+    "late": false,
+    "created_at": "2025-12-29T18:30:00Z"
+  },
+  {
+    "analytics_id": "ANA20251228_001",
+    "emp_id": "NUTANTEKE20250601",
+    "att_date": "2025-12-28",
+    "att_type": "Leave",
+    "first_checkin": null,
+    "last_checkout": null,
+    "worked_hrs": 0.0,
+    "shortfall_hrs": 9.0,
+    "on_time": false,
+    "late": false,
+    "created_at": "2025-12-28T18:30:00Z"
+  },
+
+  {
+    "analytics_id": "ANA20251231_002",
+    "emp_id": "NUTANTEKE20250602",
+    "att_date": "2025-12-31",
+    "att_type": "Present",
+    "first_checkin": "08:55",
+    "last_checkout": "17:55",
+    "worked_hrs": 9.0,
+    "shortfall_hrs": 0.0,
+    "on_time": true,
+    "late": false,
+    "created_at": "2025-12-31T18:30:00Z"
+  },
+  {
+    "analytics_id": "ANA20251230_002",
+    "emp_id": "NUTANTEKE20250602",
+    "att_date": "2025-12-30",
+    "att_type": "Present",
+    "first_checkin": "09:10",
+    "last_checkout": "18:05",
+    "worked_hrs": 8.92,
+    "shortfall_hrs": 0.08,
+    "on_time": true,
+    "late": false,
+    "created_at": "2025-12-30T18:30:00Z"
+  },
+
+  {
+    "analytics_id": "ANA20251231_003",
+    "emp_id": "NUTANTEKE20250603",
+    "att_date": "2025-12-31",
+    "att_type": "Late",
+    "first_checkin": "09:35",
+    "last_checkout": "18:20",
+    "worked_hrs": 8.75,
+    "shortfall_hrs": 0.25,
+    "on_time": false,
+    "late": true,
+    "created_at": "2025-12-31T18:30:00Z"
+  },
+
+  {
+    "analytics_id": "ANA20251231_004",
+    "emp_id": "NUTANTEKE20250604",
+    "att_date": "2025-12-31",
+    "att_type": "Leave",
+    "first_checkin": null,
+    "last_checkout": null,
+    "worked_hrs": 0.0,
+    "shortfall_hrs": 9.0,
+    "on_time": false,
+    "late": false,
+    "created_at": "2025-12-31T18:30:00Z"
+  },
+
+  {
+    "analytics_id": "ANA20251231_005",
+    "emp_id": "NUTANTEKE20250605",
+    "att_date": "2025-12-31",
+    "att_type": "Present",
+    "first_checkin": "09:00",
+    "last_checkout": "18:00",
+    "worked_hrs": 9.0,
+    "shortfall_hrs": 0.0,
+    "on_time": true,
+    "late": false,
+    "created_at": "2025-12-31T18:30:00Z"
+  }
+
 ]  
 }

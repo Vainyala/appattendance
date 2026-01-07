@@ -12,6 +12,13 @@ _$AttendanceModelImpl _$$AttendanceModelImplFromJson(
   attId: json['attId'] as String,
   empId: json['empId'] as String,
   timestamp: DateTime.parse(json['timestamp'] as String),
+  attendanceDate: DateTime.parse(json['attendanceDate'] as String),
+  checkInTime: json['checkInTime'] == null
+      ? null
+      : DateTime.parse(json['checkInTime'] as String),
+  checkOutTime: json['checkOutTime'] == null
+      ? null
+      : DateTime.parse(json['checkOutTime'] as String),
   latitude: (json['latitude'] as num?)?.toDouble(),
   longitude: (json['longitude'] as num?)?.toDouble(),
   geofenceName: json['geofenceName'] as String?,
@@ -23,6 +30,8 @@ _$AttendanceModelImpl _$$AttendanceModelImplFromJson(
     json['verificationType'],
   ),
   isVerified: json['isVerified'] as bool? ?? false,
+  leaveType: json['leaveType'] as String?,
+  photoProofPath: json['photoProofPath'] as String?,
   createdAt: json['createdAt'] == null
       ? null
       : DateTime.parse(json['createdAt'] as String),
@@ -37,6 +46,9 @@ Map<String, dynamic> _$$AttendanceModelImplToJson(
   'attId': instance.attId,
   'empId': instance.empId,
   'timestamp': instance.timestamp.toIso8601String(),
+  'attendanceDate': instance.attendanceDate.toIso8601String(),
+  'checkInTime': instance.checkInTime?.toIso8601String(),
+  'checkOutTime': instance.checkOutTime?.toIso8601String(),
   'latitude': instance.latitude,
   'longitude': instance.longitude,
   'geofenceName': instance.geofenceName,
@@ -45,6 +57,8 @@ Map<String, dynamic> _$$AttendanceModelImplToJson(
   'status': _$AttendanceStatusEnumMap[instance.status]!,
   'verificationType': _$VerificationTypeEnumMap[instance.verificationType],
   'isVerified': instance.isVerified,
+  'leaveType': instance.leaveType,
+  'photoProofPath': instance.photoProofPath,
   'createdAt': instance.createdAt?.toIso8601String(),
   'updatedAt': instance.updatedAt?.toIso8601String(),
 };

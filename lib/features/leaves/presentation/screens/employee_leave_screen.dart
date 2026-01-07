@@ -1,7 +1,11 @@
 // lib/features/leaves/presentation/screens/employee_leave_screen.dart
-// Final upgraded version: Riverpod sync + safe empId + loading/error + dynamic filters
-// Dec 30, 2025 - Production-ready, privileges safe, real data from myLeavesProvider
+// FINAL UPGRADED & POLISHED VERSION - January 06, 2026
+// Modern gradient UI, month filter, MonthlyOverviewWidget added
+// Null-safe, real-time data from myLeavesProvider, employee view only
+// Responsive, dark mode, pull-to-refresh, no overflow
+// UI/UX same (layout, colors, components) but enhanced with smoothness
 
+import 'package:appattendance/core/theme/app_gradients.dart';
 import 'package:appattendance/core/utils/app_colors.dart';
 import 'package:appattendance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:appattendance/features/leaves/domain/models/leave_model.dart';
@@ -10,13 +14,17 @@ import 'package:appattendance/features/leaves/presentation/widgets/common/leave_
 import 'package:appattendance/features/leaves/presentation/widgets/common/leave_detail_dialog.dart';
 import 'package:appattendance/features/leaves/presentation/widgets/common/leave_filter_bar.dart';
 import 'package:appattendance/features/leaves/presentation/widgets/common/month_filter_widget.dart';
+import 'package:appattendance/features/regularisation/presentation/widgets/common/monthly_overview_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 class EmployeeLeaveScreen extends ConsumerStatefulWidget {
-  const EmployeeLeaveScreen({super.key});
-
+  final Map<String, dynamic> user;
+  const EmployeeLeaveScreen({
+    super.key,
+    required this.user, // ← Make it required
+  });
   @override
   ConsumerState<EmployeeLeaveScreen> createState() =>
       _EmployeeLeaveScreenState();
@@ -24,95 +32,176 @@ class EmployeeLeaveScreen extends ConsumerStatefulWidget {
 
 class _EmployeeLeaveScreenState extends ConsumerState<EmployeeLeaveScreen> {
   String _selectedMonth = DateFormat('MMMM yyyy').format(DateTime.now());
+  bool _isRefreshing = false;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final authAsync = ref.watch(authProvider);
     final leavesAsync = ref.watch(myLeavesProvider);
 
     return Scaffold(
-      body: authAsync.when(
-        data: (user) {
-          if (user == null) {
-            return Center(
+      // extendBodyBehindAppBar: true,
+      // appBar: AppBar(
+      //   title: const Text('My Leaves'),
+      //   centerTitle: true,
+      //   backgroundColor: Colors.transparent,
+      //   elevation: 0,
+      //   foregroundColor: Colors.white,
+      //   actions: [
+      //     IconButton(
+      //       icon: _isRefreshing
+      //           ? const SizedBox(
+      //               height: 24,
+      //               width: 24,
+      //               child: CircularProgressIndicator(
+      //                 color: Colors.white,
+      //                 strokeWidth: 3,
+      //               ),
+      //             )
+      //           : const Icon(Icons.refresh),
+      //       onPressed: _isRefreshing
+      //           ? null
+      //           : () async {
+      //               setState(() => _isRefreshing = true);
+      //               await ref.read(myLeavesProvider.notifier).refresh();
+      //               setState(() => _isRefreshing = false);
+      //             },
+      //     ),
+      //   ],
+      // ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: AppGradients.dashboard(
+            Theme.of(context).brightness == Brightness.dark,
+          ),
+        ),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            setState(() => _isRefreshing = true);
+            await ref.read(myLeavesProvider.notifier).refresh();
+            setState(() => _isRefreshing = false);
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Please login to view your leaves',
-                    style: TextStyle(fontSize: 18, color: Colors.red),
-                    textAlign: TextAlign.center,
+                  // Month Filter
+                  MonthFilterWidget(
+                    initialMonth: _selectedMonth,
+                    onMonthChanged: (newMonth) {
+                      setState(() => _selectedMonth = newMonth);
+                    },
                   ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () =>
-                        Navigator.pushReplacementNamed(context, '/login'),
-                    child: const Text('Go to Login'),
+
+                  const SizedBox(height: 24),
+
+                  // Monthly Overview Widget (now called here)
+                  authAsync.when(
+                    data: (user) {
+                      if (user == null) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32),
+                            child: Text(
+                              "Please login to view your leaves",
+                              style: TextStyle(fontSize: 18, color: Colors.red),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        );
+                      }
+
+                      return leavesAsync.when(
+                        data: (leaves) {
+                          // Filter by selected month
+                          final filteredByMonth = leaves.where((leave) {
+                            final monthYear = DateFormat(
+                              'MMMM yyyy',
+                            ).format(leave.leaveFromDate);
+                            return monthYear == _selectedMonth;
+                          }).toList();
+
+                          // Stats for MonthlyOverviewWidget
+                          final total = filteredByMonth.length;
+                          final pending = filteredByMonth
+                              .where((l) => l.isPending)
+                              .length;
+                          final approved = filteredByMonth
+                              .where((l) => l.isApproved)
+                              .length;
+                          final rejected = filteredByMonth
+                              .where((l) => l.isRejected)
+                              .length;
+                          final avgShortfall =
+                              1.2; // TODO: Real calculation from DB
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Monthly Overview
+                              MonthlyOverviewWidget(
+                                total: total,
+                                pending: pending,
+                                approved: approved,
+                                rejected: rejected,
+                                avgShortfall: avgShortfall,
+                                totalDays: filteredByMonth.length,
+                                isManager: false,
+                              ),
+
+                              const SizedBox(height: 24),
+
+                              // Leave Filter Bar
+                              const LeaveFilterBar(),
+
+                              const SizedBox(height: 16),
+
+                              // Leave List
+                              filteredByMonth.isEmpty
+                                  ? const Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(32),
+                                        child: Text(
+                                          'No leaves found for this month',
+                                        ),
+                                      ),
+                                    )
+                                  : ListView.builder(
+                                      shrinkWrap: true,
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      itemCount: filteredByMonth.length,
+                                      itemBuilder: (context, index) {
+                                        final leave = filteredByMonth[index];
+                                        return LeaveCard(
+                                          leave: leave,
+                                          isManagerView: false,
+                                        );
+                                      },
+                                    ),
+                            ],
+                          );
+                        },
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (err, stack) =>
+                            Center(child: Text('Error loading leaves: $err')),
+                      );
+                    },
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (err, stack) =>
+                        Center(child: Text('Auth error: $err')),
                   ),
                 ],
               ),
-            );
-          }
-
-          return Column(
-            children: [
-              // Month Filter
-              MonthFilterWidget(
-                initialMonth: _selectedMonth,
-                onMonthChanged: (newMonth) {
-                  setState(() => _selectedMonth = newMonth);
-                },
-              ),
-
-              // Filter Bar (All/Pending/Approved/Rejected)
-              const LeaveFilterBar(),
-
-              // Leave List
-              Expanded(
-                child: leavesAsync.when(
-                  data: (leaves) {
-                    // Filter by selected month
-                    final filteredByMonth = leaves.where((leave) {
-                      final monthYear = DateFormat(
-                        'MMMM yyyy',
-                      ).format(leave.leaveFromDate);
-                      return monthYear == _selectedMonth;
-                    }).toList();
-
-                    if (filteredByMonth.isEmpty) {
-                      return const Center(
-                        child: Text('No leaves found for this month'),
-                      );
-                    }
-
-                    return ListView.builder(
-                      itemCount: filteredByMonth.length,
-                      itemBuilder: (context, index) {
-                        final leave = filteredByMonth[index];
-                        // return LeaveCard(
-                        //   leave: leave,
-                        //   isManagerView: false,
-                        //   onTap: () {
-                        //     showDialog(
-                        //       context: context,
-                        //       builder: (_) => LeaveDetailDialog(leave: leave),
-                        //     );
-                        //   },
-                        // );
-                      },
-                    );
-                  },
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (err, stack) =>
-                      Center(child: Text('Error loading leaves: $err')),
-                ),
-              ),
-            ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Auth error: $err')),
+            ),
+          ),
+        ),
       ),
     );
   }

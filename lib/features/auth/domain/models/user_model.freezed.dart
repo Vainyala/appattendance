@@ -28,15 +28,18 @@ mixin _$UserModel {
   String? get phone => throw _privateConstructorUsedError;
   UserRole get role => throw _privateConstructorUsedError;
   String? get department => throw _privateConstructorUsedError;
-  String? get designation => throw _privateConstructorUsedError;
+  String get designation => throw _privateConstructorUsedError;
   DateTime? get joiningDate => throw _privateConstructorUsedError;
+  String? get joiningDateStr => throw _privateConstructorUsedError;
   UserStatus get status => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
   List<String> get assignedProjectIds => throw _privateConstructorUsedError;
   List<String> get projectNames => throw _privateConstructorUsedError;
+  bool get biometricEnabled => throw _privateConstructorUsedError;
   String? get shiftId => throw _privateConstructorUsedError;
   String? get reportingManagerId => throw _privateConstructorUsedError;
+  String? get profilePhoto => throw _privateConstructorUsedError;
 
   /// Serializes this UserModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -61,15 +64,18 @@ abstract class $UserModelCopyWith<$Res> {
     String? phone,
     UserRole role,
     String? department,
-    String? designation,
+    String designation,
     DateTime? joiningDate,
+    String? joiningDateStr,
     UserStatus status,
     DateTime? createdAt,
     DateTime? updatedAt,
     List<String> assignedProjectIds,
     List<String> projectNames,
+    bool biometricEnabled,
     String? shiftId,
     String? reportingManagerId,
+    String? profilePhoto,
   });
 }
 
@@ -95,15 +101,18 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? phone = freezed,
     Object? role = null,
     Object? department = freezed,
-    Object? designation = freezed,
+    Object? designation = null,
     Object? joiningDate = freezed,
+    Object? joiningDateStr = freezed,
     Object? status = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
     Object? assignedProjectIds = null,
     Object? projectNames = null,
+    Object? biometricEnabled = null,
     Object? shiftId = freezed,
     Object? reportingManagerId = freezed,
+    Object? profilePhoto = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -135,14 +144,18 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
                 ? _value.department
                 : department // ignore: cast_nullable_to_non_nullable
                       as String?,
-            designation: freezed == designation
+            designation: null == designation
                 ? _value.designation
                 : designation // ignore: cast_nullable_to_non_nullable
-                      as String?,
+                      as String,
             joiningDate: freezed == joiningDate
                 ? _value.joiningDate
                 : joiningDate // ignore: cast_nullable_to_non_nullable
                       as DateTime?,
+            joiningDateStr: freezed == joiningDateStr
+                ? _value.joiningDateStr
+                : joiningDateStr // ignore: cast_nullable_to_non_nullable
+                      as String?,
             status: null == status
                 ? _value.status
                 : status // ignore: cast_nullable_to_non_nullable
@@ -163,6 +176,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
                 ? _value.projectNames
                 : projectNames // ignore: cast_nullable_to_non_nullable
                       as List<String>,
+            biometricEnabled: null == biometricEnabled
+                ? _value.biometricEnabled
+                : biometricEnabled // ignore: cast_nullable_to_non_nullable
+                      as bool,
             shiftId: freezed == shiftId
                 ? _value.shiftId
                 : shiftId // ignore: cast_nullable_to_non_nullable
@@ -170,6 +187,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
             reportingManagerId: freezed == reportingManagerId
                 ? _value.reportingManagerId
                 : reportingManagerId // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            profilePhoto: freezed == profilePhoto
+                ? _value.profilePhoto
+                : profilePhoto // ignore: cast_nullable_to_non_nullable
                       as String?,
           )
           as $Val,
@@ -194,15 +215,18 @@ abstract class _$$UserModelImplCopyWith<$Res>
     String? phone,
     UserRole role,
     String? department,
-    String? designation,
+    String designation,
     DateTime? joiningDate,
+    String? joiningDateStr,
     UserStatus status,
     DateTime? createdAt,
     DateTime? updatedAt,
     List<String> assignedProjectIds,
     List<String> projectNames,
+    bool biometricEnabled,
     String? shiftId,
     String? reportingManagerId,
+    String? profilePhoto,
   });
 }
 
@@ -227,15 +251,18 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? phone = freezed,
     Object? role = null,
     Object? department = freezed,
-    Object? designation = freezed,
+    Object? designation = null,
     Object? joiningDate = freezed,
+    Object? joiningDateStr = freezed,
     Object? status = null,
     Object? createdAt = freezed,
     Object? updatedAt = freezed,
     Object? assignedProjectIds = null,
     Object? projectNames = null,
+    Object? biometricEnabled = null,
     Object? shiftId = freezed,
     Object? reportingManagerId = freezed,
+    Object? profilePhoto = freezed,
   }) {
     return _then(
       _$UserModelImpl(
@@ -267,14 +294,18 @@ class __$$UserModelImplCopyWithImpl<$Res>
             ? _value.department
             : department // ignore: cast_nullable_to_non_nullable
                   as String?,
-        designation: freezed == designation
+        designation: null == designation
             ? _value.designation
             : designation // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as String,
         joiningDate: freezed == joiningDate
             ? _value.joiningDate
             : joiningDate // ignore: cast_nullable_to_non_nullable
                   as DateTime?,
+        joiningDateStr: freezed == joiningDateStr
+            ? _value.joiningDateStr
+            : joiningDateStr // ignore: cast_nullable_to_non_nullable
+                  as String?,
         status: null == status
             ? _value.status
             : status // ignore: cast_nullable_to_non_nullable
@@ -295,6 +326,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
             ? _value._projectNames
             : projectNames // ignore: cast_nullable_to_non_nullable
                   as List<String>,
+        biometricEnabled: null == biometricEnabled
+            ? _value.biometricEnabled
+            : biometricEnabled // ignore: cast_nullable_to_non_nullable
+                  as bool,
         shiftId: freezed == shiftId
             ? _value.shiftId
             : shiftId // ignore: cast_nullable_to_non_nullable
@@ -303,6 +338,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
             ? _value.reportingManagerId
             : reportingManagerId // ignore: cast_nullable_to_non_nullable
                   as String?,
+        profilePhoto: freezed == profilePhoto
+            ? _value.profilePhoto
+            : profilePhoto // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -310,7 +349,7 @@ class __$$UserModelImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$UserModelImpl extends _UserModel {
+class _$UserModelImpl implements _UserModel {
   const _$UserModelImpl({
     required this.empId,
     required this.orgShortName,
@@ -319,18 +358,20 @@ class _$UserModelImpl extends _UserModel {
     this.phone,
     required this.role,
     this.department,
-    this.designation,
+    this.designation = 'Employee',
     this.joiningDate,
+    this.joiningDateStr,
     this.status = UserStatus.active,
     this.createdAt,
     this.updatedAt,
     final List<String> assignedProjectIds = const [],
     final List<String> projectNames = const [],
+    this.biometricEnabled = false,
     this.shiftId,
     this.reportingManagerId,
+    this.profilePhoto,
   }) : _assignedProjectIds = assignedProjectIds,
-       _projectNames = projectNames,
-       super._();
+       _projectNames = projectNames;
 
   factory _$UserModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$UserModelImplFromJson(json);
@@ -350,9 +391,12 @@ class _$UserModelImpl extends _UserModel {
   @override
   final String? department;
   @override
-  final String? designation;
+  @JsonKey()
+  final String designation;
   @override
   final DateTime? joiningDate;
+  @override
+  final String? joiningDateStr;
   @override
   @JsonKey()
   final UserStatus status;
@@ -380,13 +424,18 @@ class _$UserModelImpl extends _UserModel {
   }
 
   @override
+  @JsonKey()
+  final bool biometricEnabled;
+  @override
   final String? shiftId;
   @override
   final String? reportingManagerId;
+  @override
+  final String? profilePhoto;
 
   @override
   String toString() {
-    return 'UserModel(empId: $empId, orgShortName: $orgShortName, name: $name, email: $email, phone: $phone, role: $role, department: $department, designation: $designation, joiningDate: $joiningDate, status: $status, createdAt: $createdAt, updatedAt: $updatedAt, assignedProjectIds: $assignedProjectIds, projectNames: $projectNames, shiftId: $shiftId, reportingManagerId: $reportingManagerId)';
+    return 'UserModel(empId: $empId, orgShortName: $orgShortName, name: $name, email: $email, phone: $phone, role: $role, department: $department, designation: $designation, joiningDate: $joiningDate, joiningDateStr: $joiningDateStr, status: $status, createdAt: $createdAt, updatedAt: $updatedAt, assignedProjectIds: $assignedProjectIds, projectNames: $projectNames, biometricEnabled: $biometricEnabled, shiftId: $shiftId, reportingManagerId: $reportingManagerId, profilePhoto: $profilePhoto)';
   }
 
   @override
@@ -407,6 +456,8 @@ class _$UserModelImpl extends _UserModel {
                 other.designation == designation) &&
             (identical(other.joiningDate, joiningDate) ||
                 other.joiningDate == joiningDate) &&
+            (identical(other.joiningDateStr, joiningDateStr) ||
+                other.joiningDateStr == joiningDateStr) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
@@ -420,14 +471,18 @@ class _$UserModelImpl extends _UserModel {
               other._projectNames,
               _projectNames,
             ) &&
+            (identical(other.biometricEnabled, biometricEnabled) ||
+                other.biometricEnabled == biometricEnabled) &&
             (identical(other.shiftId, shiftId) || other.shiftId == shiftId) &&
             (identical(other.reportingManagerId, reportingManagerId) ||
-                other.reportingManagerId == reportingManagerId));
+                other.reportingManagerId == reportingManagerId) &&
+            (identical(other.profilePhoto, profilePhoto) ||
+                other.profilePhoto == profilePhoto));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     empId,
     orgShortName,
@@ -438,14 +493,17 @@ class _$UserModelImpl extends _UserModel {
     department,
     designation,
     joiningDate,
+    joiningDateStr,
     status,
     createdAt,
     updatedAt,
     const DeepCollectionEquality().hash(_assignedProjectIds),
     const DeepCollectionEquality().hash(_projectNames),
+    biometricEnabled,
     shiftId,
     reportingManagerId,
-  );
+    profilePhoto,
+  ]);
 
   /// Create a copy of UserModel
   /// with the given fields replaced by the non-null parameter values.
@@ -461,7 +519,7 @@ class _$UserModelImpl extends _UserModel {
   }
 }
 
-abstract class _UserModel extends UserModel {
+abstract class _UserModel implements UserModel {
   const factory _UserModel({
     required final String empId,
     required final String orgShortName,
@@ -470,17 +528,19 @@ abstract class _UserModel extends UserModel {
     final String? phone,
     required final UserRole role,
     final String? department,
-    final String? designation,
+    final String designation,
     final DateTime? joiningDate,
+    final String? joiningDateStr,
     final UserStatus status,
     final DateTime? createdAt,
     final DateTime? updatedAt,
     final List<String> assignedProjectIds,
     final List<String> projectNames,
+    final bool biometricEnabled,
     final String? shiftId,
     final String? reportingManagerId,
+    final String? profilePhoto,
   }) = _$UserModelImpl;
-  const _UserModel._() : super._();
 
   factory _UserModel.fromJson(Map<String, dynamic> json) =
       _$UserModelImpl.fromJson;
@@ -500,9 +560,11 @@ abstract class _UserModel extends UserModel {
   @override
   String? get department;
   @override
-  String? get designation;
+  String get designation;
   @override
   DateTime? get joiningDate;
+  @override
+  String? get joiningDateStr;
   @override
   UserStatus get status;
   @override
@@ -514,9 +576,13 @@ abstract class _UserModel extends UserModel {
   @override
   List<String> get projectNames;
   @override
+  bool get biometricEnabled;
+  @override
   String? get shiftId;
   @override
   String? get reportingManagerId;
+  @override
+  String? get profilePhoto;
 
   /// Create a copy of UserModel
   /// with the given fields replaced by the non-null parameter values.

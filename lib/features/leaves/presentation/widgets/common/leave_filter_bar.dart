@@ -6,15 +6,18 @@ import 'dart:io';
 
 import 'package:appattendance/core/utils/app_colors.dart';
 import 'package:appattendance/features/auth/domain/models/user_model.dart';
+import 'package:appattendance/features/auth/domain/models/user_extension.dart';
+import 'package:appattendance/features/auth/domain/models/user_role.dart';
+import 'package:appattendance/features/auth/domain/models/user_db_mapper.dart';
 import 'package:appattendance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:appattendance/features/leaves/domain/models/leave_model.dart';
 import 'package:appattendance/features/leaves/presentation/providers/leave_provider.dart';
 import 'package:appattendance/features/leaves/presentation/utils/leave_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:csv/csv.dart';
-import 'package:open_file/open_file.dart';
 import 'package:intl/intl.dart';
 
 class LeaveFilterBar extends ConsumerWidget {
@@ -43,7 +46,8 @@ class LeaveFilterBar extends ConsumerWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: isDark ? Colors.grey.shade900 : Colors.white,
+            color: Colors.transparent,
+            // color: isDark ? Colors.grey.shade900 : Colors.white,
             border: Border(
               bottom: BorderSide(
                 color: isDark ? Colors.grey[700]! : Colors.grey[200]!,
@@ -222,7 +226,7 @@ class LeaveFilterBar extends ConsumerWidget {
         content: const Text('CSV exported!'),
         action: SnackBarAction(
           label: 'Open',
-          onPressed: () => OpenFile.open(path),
+          onPressed: () => OpenFilex.open(path),
         ),
       ),
     );

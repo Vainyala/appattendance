@@ -3,14 +3,15 @@
 import 'dart:io';
 
 import 'package:appattendance/core/utils/app_colors.dart';
+import 'package:appattendance/features/regularisation/domain/models/regularisation_filter.dart';
 import 'package:appattendance/features/regularisation/presentation/providers/regularisation_notifier.dart';
 import 'package:excel/excel.dart' hide Border;
 import 'package:flutter/material.dart';
+import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-enum RegularisationFilter { all, pending, approved, rejected }
+// enum RegularisationFilter { all, pending, approved, rejected }
 
 class RegularisationFilterBar extends StatelessWidget {
   final RegularisationFilter selectedFilter;
@@ -31,7 +32,8 @@ class RegularisationFilterBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: isDark ? Colors.grey.shade900 : Colors.white,
+        // color: isDark ? Colors.grey.shade900 : Colors.white,
+        color: Colors.transparent,
         border: Border(
           bottom: BorderSide(
             color: isDark ? Colors.grey[700]! : Colors.grey[200]!,
@@ -114,9 +116,8 @@ class RegularisationFilterBar extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: selected
-              ? AppColors.primary
-              : (isDark ? Colors.grey[700] : Colors.grey[200]),
+          color: selected ? AppColors.primary : Colors.grey.withOpacity(0.2),
+
           borderRadius: BorderRadius.circular(30),
           border: Border.all(
             color: selected ? AppColors.primary : Colors.transparent,
@@ -242,7 +243,7 @@ class RegularisationFilterBar extends StatelessWidget {
       await file.writeAsBytes(excel.encode()!);
 
       // Open file
-      final result = await OpenFile.open(path);
+      final result = await OpenFilex.open(path);
       if (result.type != ResultType.done) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('File open failed: ${result.message}')),

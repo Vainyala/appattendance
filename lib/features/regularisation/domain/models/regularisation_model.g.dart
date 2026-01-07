@@ -22,8 +22,14 @@ _$RegularisationModelImpl _$$RegularisationModelImplFromJson(
           ?.map((e) => e as String)
           .toList() ??
       const [],
-  createdAt: DateTime.parse(json['createdAt'] as String),
-  updatedAt: DateTime.parse(json['updatedAt'] as String),
+  fromTime: json['fromTime'] as String?,
+  toTime: json['toTime'] as String?,
+  createdAt: json['createdAt'] == null
+      ? null
+      : DateTime.parse(json['createdAt'] as String),
+  updatedAt: json['updatedAt'] == null
+      ? null
+      : DateTime.parse(json['updatedAt'] as String),
 );
 
 Map<String, dynamic> _$$RegularisationModelImplToJson(
@@ -38,8 +44,10 @@ Map<String, dynamic> _$$RegularisationModelImplToJson(
   'status': _$RegularisationStatusEnumMap[instance.status]!,
   'managerRemarks': instance.managerRemarks,
   'supportingDocs': instance.supportingDocs,
-  'createdAt': instance.createdAt.toIso8601String(),
-  'updatedAt': instance.updatedAt.toIso8601String(),
+  'fromTime': instance.fromTime,
+  'toTime': instance.toTime,
+  'createdAt': instance.createdAt?.toIso8601String(),
+  'updatedAt': instance.updatedAt?.toIso8601String(),
 };
 
 const _$RegularisationTypeEnumMap = {

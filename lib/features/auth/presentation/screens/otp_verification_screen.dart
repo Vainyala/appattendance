@@ -1,15 +1,12 @@
 // lib/features/auth/presentation/screens/otp_verification_screen.dart
-// Final production-ready OTP Verification Screen
-// Uses local DB for dummy OTP validation (e.g., "123456")
-// Future API-ready (commented)
+// FINAL UPDATED VERSION - January 05, 2026
+// Fixes overflow in portrait & landscape
+// Responsive layout with SingleChildScrollView
 // Full error handling, loading, dark mode, auto-focus OTP fields
-// Role-based flow (employee/manager) + navigation to dashboard
-// Current date context: December 29, 2025
+// Dummy OTP validation + navigation to set password
 
-import 'package:appattendance/core/database/db_helper.dart';
 import 'package:appattendance/core/utils/app_colors.dart';
 import 'package:appattendance/features/auth/presentation/screens/set_password_screen.dart';
-import 'package:appattendance/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,7 +50,9 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen>
     _animController.forward();
 
     // Auto-focus first field
-    _focusNodes[0].requestFocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNodes[0].requestFocus();
+    });
   }
 
   @override
@@ -80,14 +79,13 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen>
 
     try {
       // Dummy OTP validation (in real: API call)
-      // Future API: await dio.post('/auth/verify-otp', data: {'email': widget.email, 'otp': _otp});
       const dummyOtp = '123456'; // From dummy_data.json or hardcoded for demo
 
       if (_otp != dummyOtp) {
         throw Exception('Invalid OTP');
       }
 
-      // OTP valid → Proceed to next step (e.g., set password)
+      // OTP valid → Proceed to set password
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
@@ -109,6 +107,8 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = screenSize.width > screenSize.height;
 
     return Scaffold(
       body: Container(
@@ -124,168 +124,198 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen>
         child: SafeArea(
           child: FadeTransition(
             opacity: _fadeAnimation,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Icon
-                  Center(
-                    child: Icon(
-                      Icons.lock_open_rounded,
-                      size: 100,
-                      color: isDark ? Colors.white : AppColors.primary,
+            child: SingleChildScrollView(
+              // ← Added for scroll in overflow cases
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.symmetric(
+                horizontal: isLandscape ? 60.0 : 32.0,
+                vertical: 24.0,
+              ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight:
+                      screenSize.height -
+                      MediaQuery.of(context).padding.top -
+                      kToolbarHeight,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Icon (smaller in landscape)
+                    Center(
+                      child: Icon(
+                        Icons.lock_open_rounded,
+                        size: isLandscape ? 80 : 100,
+                        color: isDark ? Colors.white : AppColors.primary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 40),
+                    SizedBox(height: isLandscape ? 24 : 40),
 
-                  // Title
-                  Text(
-                    'OTP Verification',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black87,
+                    // Title
+                    Text(
+                      'OTP Verification',
+                      style: TextStyle(
+                        fontSize: isLandscape ? 28 : 32,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
+                    SizedBox(height: isLandscape ? 12 : 16),
 
-                  // Subtitle
-                  Text(
-                    'Enter the 6-digit code sent to\n${widget.email}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: isDark ? Colors.white70 : Colors.grey[700],
+                    // Subtitle
+                    Text(
+                      'Enter the 6-digit code sent to\n${widget.email}',
+                      style: TextStyle(
+                        fontSize: isLandscape ? 14 : 16,
+                        color: isDark ? Colors.white70 : Colors.grey[700],
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 48),
+                    SizedBox(height: isLandscape ? 32 : 48),
 
-                  // OTP Fields
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(
-                      6,
-                      (index) => SizedBox(
-                        width: 50,
-                        child: TextField(
-                          controller: _otpControllers[index],
-                          focusNode: _focusNodes[index],
-                          textAlign: TextAlign.center,
-                          keyboardType: TextInputType.number,
-                          maxLength: 1,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          decoration: InputDecoration(
-                            counterText: '',
-                            filled: true,
-                            fillColor: isDark
-                                ? Colors.grey[800]
-                                : Colors.grey[100],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
+                    // OTP Fields - Responsive
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(
+                          6,
+                          (index) => Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6.0,
+                            ),
+                            child: SizedBox(
+                              width: isLandscape ? 45 : 50,
+                              child: TextField(
+                                controller: _otpControllers[index],
+                                focusNode: _focusNodes[index],
+                                textAlign: TextAlign.center,
+                                keyboardType: TextInputType.number,
+                                maxLength: 1,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
+                                decoration: InputDecoration(
+                                  counterText: '',
+                                  filled: true,
+                                  fillColor: isDark
+                                      ? Colors.grey[800]
+                                      : Colors.grey[100],
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                ),
+                                onChanged: (value) {
+                                  if (value.isNotEmpty && index < 5) {
+                                    _focusNodes[index + 1].requestFocus();
+                                  } else if (value.isEmpty && index > 0) {
+                                    _focusNodes[index - 1].requestFocus();
+                                  }
+
+                                  // Auto-verify on last digit
+                                  if (index == 5 && value.isNotEmpty) {
+                                    _verifyOtp();
+                                  }
+                                },
+                              ),
                             ),
                           ),
-                          onChanged: (value) {
-                            if (value.isNotEmpty && index < 5) {
-                              _focusNodes[index + 1].requestFocus();
-                            } else if (value.isEmpty && index > 0) {
-                              _focusNodes[index - 1].requestFocus();
-                            }
-
-                            // Auto-verify on last digit
-                            if (index == 5 && value.isNotEmpty) {
-                              _verifyOtp();
-                            }
-                          },
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
+                    SizedBox(height: isLandscape ? 12 : 16),
 
-                  // Error Message
-                  if (_errorMessage != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        _errorMessage!,
-                        style: const TextStyle(color: Colors.red, fontSize: 14),
-                        textAlign: TextAlign.center,
+                    // Error Message
+                    if (_errorMessage != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+
+                    SizedBox(height: isLandscape ? 24 : 32),
+
+                    // Verify Button
+                    SizedBox(
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: _isVerifying || _otp.length != 6
+                            ? null
+                            : _verifyOtp,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 6,
+                        ),
+                        child: _isVerifying
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                            : const Text(
+                                'VERIFY OTP',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
 
-                  const SizedBox(height: 32),
+                    SizedBox(height: isLandscape ? 16 : 24),
 
-                  // Verify Button
-                  SizedBox(
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _isVerifying || _otp.length != 6
+                    // Resend OTP
+                    TextButton(
+                      onPressed: _isVerifying
                           ? null
-                          : _verifyOtp,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          : () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('OTP Resent! (Dummy)'),
+                                ),
+                              );
+                            },
+                      child: const Text(
+                        'Resend OTP',
+                        style: TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 16,
                         ),
-                        elevation: 6,
                       ),
-                      child: _isVerifying
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
-                              ),
-                            )
-                          : const Text(
-                              'VERIFY OTP',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
                     ),
-                  ),
 
-                  const SizedBox(height: 24),
+                    SizedBox(height: isLandscape ? 24 : 40),
 
-                  // Resend OTP
-                  TextButton(
-                    onPressed: _isVerifying
-                        ? null
-                        : () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('OTP Resent! (Dummy)'),
-                              ),
-                            );
-                          },
-                    child: const Text(
-                      'Resend OTP',
-                      style: TextStyle(color: AppColors.primary, fontSize: 16),
+                    // Footer
+                    Text(
+                      '© 2025 Nutantek • Enterprise Edition',
+                      style: TextStyle(
+                        color: isDark ? Colors.white60 : Colors.grey[600],
+                        fontSize: 12,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  // Footer
-                  Text(
-                    '© 2025 Nutantek • Enterprise Edition',
-                    style: TextStyle(
-                      color: isDark ? Colors.white60 : Colors.grey[600],
-                      fontSize: 12,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -294,6 +324,303 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen>
     );
   }
 }
+
+// // lib/features/auth/presentation/screens/otp_verification_screen.dart
+// // Final production-ready OTP Verification Screen
+// // Uses local DB for dummy OTP validation (e.g., "123456")
+// // Future API-ready (commented)
+// // Full error handling, loading, dark mode, auto-focus OTP fields
+// // Role-based flow (employee/manager) + navigation to dashboard
+// // Current date context: December 29, 2025
+
+// import 'package:appattendance/core/database/db_helper.dart';
+// import 'package:appattendance/core/utils/app_colors.dart';
+// import 'package:appattendance/features/auth/presentation/screens/set_password_screen.dart';
+// import 'package:appattendance/features/dashboard/presentation/screens/dashboard_screen.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// class OtpVerificationScreen extends ConsumerStatefulWidget {
+//   final String email;
+
+//   const OtpVerificationScreen({super.key, required this.email});
+
+//   @override
+//   ConsumerState<OtpVerificationScreen> createState() =>
+//       _OtpVerificationScreenState();
+// }
+
+// class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen>
+//     with SingleTickerProviderStateMixin {
+//   final List<TextEditingController> _otpControllers = List.generate(
+//     6,
+//     (_) => TextEditingController(),
+//   );
+//   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
+//   bool _isVerifying = false;
+//   String? _errorMessage;
+
+//   late AnimationController _animController;
+//   late Animation<double> _fadeAnimation;
+
+//   @override
+//   void initState() {
+//     super.initState();
+
+//     _animController = AnimationController(
+//       vsync: this,
+//       duration: const Duration(milliseconds: 1200),
+//     );
+
+//     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+//       CurvedAnimation(parent: _animController, curve: Curves.easeInOut),
+//     );
+
+//     _animController.forward();
+
+//     // Auto-focus first field
+//     _focusNodes[0].requestFocus();
+//   }
+
+//   @override
+//   void dispose() {
+//     for (var controller in _otpControllers) {
+//       controller.dispose();
+//     }
+//     for (var node in _focusNodes) {
+//       node.dispose();
+//     }
+//     _animController.dispose();
+//     super.dispose();
+//   }
+
+//   String get _otp => _otpControllers.map((c) => c.text).join();
+
+//   Future<void> _verifyOtp() async {
+//     if (_otp.length != 6) return;
+
+//     setState(() {
+//       _isVerifying = true;
+//       _errorMessage = null;
+//     });
+
+//     try {
+//       // Dummy OTP validation (in real: API call)
+//       // Future API: await dio.post('/auth/verify-otp', data: {'email': widget.email, 'otp': _otp});
+//       const dummyOtp = '123456'; // From dummy_data.json or hardcoded for demo
+
+//       if (_otp != dummyOtp) {
+//         throw Exception('Invalid OTP');
+//       }
+
+//       // OTP valid → Proceed to next step (e.g., set password)
+//       if (!mounted) return;
+//       Navigator.pushReplacement(
+//         context,
+//         MaterialPageRoute(
+//           builder: (_) => SetPasswordScreen(email: widget.email),
+//         ),
+//       );
+//     } catch (e) {
+//       setState(() {
+//         _errorMessage = e.toString().replaceFirst('Exception: ', '');
+//       });
+//     } finally {
+//       if (mounted) {
+//         setState(() => _isVerifying = false);
+//       }
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+//     return Scaffold(
+//       body: Container(
+//         decoration: BoxDecoration(
+//           gradient: LinearGradient(
+//             begin: Alignment.topLeft,
+//             end: Alignment.bottomRight,
+//             colors: isDark
+//                 ? [Colors.blueGrey.shade900, Colors.black87]
+//                 : [AppColors.primary.withOpacity(0.1), Colors.white],
+//           ),
+//         ),
+//         child: SafeArea(
+//           child: FadeTransition(
+//             opacity: _fadeAnimation,
+//             child: Padding(
+//               padding: const EdgeInsets.symmetric(horizontal: 32.0),
+//               child: Column(
+//                 mainAxisAlignment: MainAxisAlignment.center,
+//                 crossAxisAlignment: CrossAxisAlignment.stretch,
+//                 children: [
+//                   // Icon
+//                   Center(
+//                     child: Icon(
+//                       Icons.lock_open_rounded,
+//                       size: 100,
+//                       color: isDark ? Colors.white : AppColors.primary,
+//                     ),
+//                   ),
+//                   const SizedBox(height: 40),
+
+//                   // Title
+//                   Text(
+//                     'OTP Verification',
+//                     style: TextStyle(
+//                       fontSize: 32,
+//                       fontWeight: FontWeight.bold,
+//                       color: isDark ? Colors.white : Colors.black87,
+//                     ),
+//                     textAlign: TextAlign.center,
+//                   ),
+//                   const SizedBox(height: 16),
+
+//                   // Subtitle
+//                   Text(
+//                     'Enter the 6-digit code sent to\n${widget.email}',
+//                     style: TextStyle(
+//                       fontSize: 16,
+//                       color: isDark ? Colors.white70 : Colors.grey[700],
+//                     ),
+//                     textAlign: TextAlign.center,
+//                   ),
+//                   const SizedBox(height: 48),
+
+//                   // OTP Fields
+//                   Row(
+//                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//                     children: List.generate(
+//                       6,
+//                       (index) => SizedBox(
+//                         width: 50,
+//                         child: TextField(
+//                           controller: _otpControllers[index],
+//                           focusNode: _focusNodes[index],
+//                           textAlign: TextAlign.center,
+//                           keyboardType: TextInputType.number,
+//                           maxLength: 1,
+//                           inputFormatters: [
+//                             FilteringTextInputFormatter.digitsOnly,
+//                           ],
+//                           decoration: InputDecoration(
+//                             counterText: '',
+//                             filled: true,
+//                             fillColor: isDark
+//                                 ? Colors.grey[800]
+//                                 : Colors.grey[100],
+//                             border: OutlineInputBorder(
+//                               borderRadius: BorderRadius.circular(12),
+//                               borderSide: BorderSide.none,
+//                             ),
+//                           ),
+//                           onChanged: (value) {
+//                             if (value.isNotEmpty && index < 5) {
+//                               _focusNodes[index + 1].requestFocus();
+//                             } else if (value.isEmpty && index > 0) {
+//                               _focusNodes[index - 1].requestFocus();
+//                             }
+
+//                             // Auto-verify on last digit
+//                             if (index == 5 && value.isNotEmpty) {
+//                               _verifyOtp();
+//                             }
+//                           },
+//                         ),
+//                       ),
+//                     ),
+//                   ),
+//                   const SizedBox(height: 16),
+
+//                   // Error Message
+//                   if (_errorMessage != null)
+//                     Padding(
+//                       padding: const EdgeInsets.symmetric(vertical: 8),
+//                       child: Text(
+//                         _errorMessage!,
+//                         style: const TextStyle(color: Colors.red, fontSize: 14),
+//                         textAlign: TextAlign.center,
+//                       ),
+//                     ),
+
+//                   const SizedBox(height: 32),
+
+//                   // Verify Button
+//                   SizedBox(
+//                     height: 56,
+//                     child: ElevatedButton(
+//                       onPressed: _isVerifying || _otp.length != 6
+//                           ? null
+//                           : _verifyOtp,
+//                       style: ElevatedButton.styleFrom(
+//                         backgroundColor: AppColors.primary,
+//                         shape: RoundedRectangleBorder(
+//                           borderRadius: BorderRadius.circular(12),
+//                         ),
+//                         elevation: 6,
+//                       ),
+//                       child: _isVerifying
+//                           ? const SizedBox(
+//                               height: 24,
+//                               width: 24,
+//                               child: CircularProgressIndicator(
+//                                 color: Colors.white,
+//                                 strokeWidth: 2.5,
+//                               ),
+//                             )
+//                           : const Text(
+//                               'VERIFY OTP',
+//                               style: TextStyle(
+//                                 fontSize: 18,
+//                                 fontWeight: FontWeight.bold,
+//                                 color: Colors.white,
+//                               ),
+//                             ),
+//                     ),
+//                   ),
+
+//                   const SizedBox(height: 24),
+
+//                   // Resend OTP
+//                   TextButton(
+//                     onPressed: _isVerifying
+//                         ? null
+//                         : () {
+//                             ScaffoldMessenger.of(context).showSnackBar(
+//                               const SnackBar(
+//                                 content: Text('OTP Resent! (Dummy)'),
+//                               ),
+//                             );
+//                           },
+//                     child: const Text(
+//                       'Resend OTP',
+//                       style: TextStyle(color: AppColors.primary, fontSize: 16),
+//                     ),
+//                   ),
+
+//                   const SizedBox(height: 40),
+
+//                   // Footer
+//                   Text(
+//                     '© 2025 Nutantek • Enterprise Edition',
+//                     style: TextStyle(
+//                       color: isDark ? Colors.white60 : Colors.grey[600],
+//                       fontSize: 12,
+//                     ),
+//                     textAlign: TextAlign.center,
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 // // lib/features/auth/presentation/screens/otp_verification_screen.dart
 

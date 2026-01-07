@@ -24,21 +24,21 @@ mixin _$RegularisationModel {
   String get regId => throw _privateConstructorUsedError; // reg_id
   String get empId => throw _privateConstructorUsedError; // emp_id
   DateTime get appliedForDate =>
-      throw _privateConstructorUsedError; // reg_applied_for_date
+      throw _privateConstructorUsedError; // reg_applied_for_date (main date)
   DateTime get appliedDate =>
-      throw _privateConstructorUsedError; // reg_date_applied
-  RegularisationType get type =>
-      throw _privateConstructorUsedError; // reg_type - Full Day / Check-in Only etc.
-  String get justification =>
-      throw _privateConstructorUsedError; // reg_justification
-  RegularisationStatus get status =>
-      throw _privateConstructorUsedError; // reg_approval_status
-  String? get managerRemarks =>
-      throw _privateConstructorUsedError; // manager comments on approve/reject
+      throw _privateConstructorUsedError; // reg_date_applied (application date)
+  RegularisationType get type => throw _privateConstructorUsedError;
+  String get justification => throw _privateConstructorUsedError;
+  RegularisationStatus get status => throw _privateConstructorUsedError;
+  String? get managerRemarks => throw _privateConstructorUsedError;
   List<String> get supportingDocs =>
-      throw _privateConstructorUsedError; // future documents
-  DateTime get createdAt => throw _privateConstructorUsedError;
-  DateTime get updatedAt => throw _privateConstructorUsedError;
+      throw _privateConstructorUsedError; // NEW: Time range for half-day/full-day regularisation
+  String? get fromTime =>
+      throw _privateConstructorUsedError; // e.g., "09:00" (HH:mm string)
+  String? get toTime =>
+      throw _privateConstructorUsedError; // e.g., "18:00" (HH:mm string)
+  DateTime? get createdAt => throw _privateConstructorUsedError;
+  DateTime? get updatedAt => throw _privateConstructorUsedError;
 
   /// Serializes this RegularisationModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -67,8 +67,10 @@ abstract class $RegularisationModelCopyWith<$Res> {
     RegularisationStatus status,
     String? managerRemarks,
     List<String> supportingDocs,
-    DateTime createdAt,
-    DateTime updatedAt,
+    String? fromTime,
+    String? toTime,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   });
 }
 
@@ -96,8 +98,10 @@ class _$RegularisationModelCopyWithImpl<$Res, $Val extends RegularisationModel>
     Object? status = null,
     Object? managerRemarks = freezed,
     Object? supportingDocs = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
+    Object? fromTime = freezed,
+    Object? toTime = freezed,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -137,14 +141,22 @@ class _$RegularisationModelCopyWithImpl<$Res, $Val extends RegularisationModel>
                 ? _value.supportingDocs
                 : supportingDocs // ignore: cast_nullable_to_non_nullable
                       as List<String>,
-            createdAt: null == createdAt
+            fromTime: freezed == fromTime
+                ? _value.fromTime
+                : fromTime // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            toTime: freezed == toTime
+                ? _value.toTime
+                : toTime // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            createdAt: freezed == createdAt
                 ? _value.createdAt
                 : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
-            updatedAt: null == updatedAt
+                      as DateTime?,
+            updatedAt: freezed == updatedAt
                 ? _value.updatedAt
                 : updatedAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
+                      as DateTime?,
           )
           as $Val,
     );
@@ -170,8 +182,10 @@ abstract class _$$RegularisationModelImplCopyWith<$Res>
     RegularisationStatus status,
     String? managerRemarks,
     List<String> supportingDocs,
-    DateTime createdAt,
-    DateTime updatedAt,
+    String? fromTime,
+    String? toTime,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   });
 }
 
@@ -198,8 +212,10 @@ class __$$RegularisationModelImplCopyWithImpl<$Res>
     Object? status = null,
     Object? managerRemarks = freezed,
     Object? supportingDocs = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
+    Object? fromTime = freezed,
+    Object? toTime = freezed,
+    Object? createdAt = freezed,
+    Object? updatedAt = freezed,
   }) {
     return _then(
       _$RegularisationModelImpl(
@@ -239,14 +255,22 @@ class __$$RegularisationModelImplCopyWithImpl<$Res>
             ? _value._supportingDocs
             : supportingDocs // ignore: cast_nullable_to_non_nullable
                   as List<String>,
-        createdAt: null == createdAt
+        fromTime: freezed == fromTime
+            ? _value.fromTime
+            : fromTime // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        toTime: freezed == toTime
+            ? _value.toTime
+            : toTime // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        createdAt: freezed == createdAt
             ? _value.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
-        updatedAt: null == updatedAt
+                  as DateTime?,
+        updatedAt: freezed == updatedAt
             ? _value.updatedAt
             : updatedAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
+                  as DateTime?,
       ),
     );
   }
@@ -265,8 +289,10 @@ class _$RegularisationModelImpl extends _RegularisationModel {
     required this.status,
     this.managerRemarks,
     final List<String> supportingDocs = const [],
-    required this.createdAt,
-    required this.updatedAt,
+    this.fromTime,
+    this.toTime,
+    this.createdAt,
+    this.updatedAt,
   }) : _supportingDocs = supportingDocs,
        super._();
 
@@ -281,24 +307,19 @@ class _$RegularisationModelImpl extends _RegularisationModel {
   // emp_id
   @override
   final DateTime appliedForDate;
-  // reg_applied_for_date
+  // reg_applied_for_date (main date)
   @override
   final DateTime appliedDate;
-  // reg_date_applied
+  // reg_date_applied (application date)
   @override
   final RegularisationType type;
-  // reg_type - Full Day / Check-in Only etc.
   @override
   final String justification;
-  // reg_justification
   @override
   final RegularisationStatus status;
-  // reg_approval_status
   @override
   final String? managerRemarks;
-  // manager comments on approve/reject
   final List<String> _supportingDocs;
-  // manager comments on approve/reject
   @override
   @JsonKey()
   List<String> get supportingDocs {
@@ -307,15 +328,21 @@ class _$RegularisationModelImpl extends _RegularisationModel {
     return EqualUnmodifiableListView(_supportingDocs);
   }
 
-  // future documents
+  // NEW: Time range for half-day/full-day regularisation
   @override
-  final DateTime createdAt;
+  final String? fromTime;
+  // e.g., "09:00" (HH:mm string)
   @override
-  final DateTime updatedAt;
+  final String? toTime;
+  // e.g., "18:00" (HH:mm string)
+  @override
+  final DateTime? createdAt;
+  @override
+  final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'RegularisationModel(regId: $regId, empId: $empId, appliedForDate: $appliedForDate, appliedDate: $appliedDate, type: $type, justification: $justification, status: $status, managerRemarks: $managerRemarks, supportingDocs: $supportingDocs, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'RegularisationModel(regId: $regId, empId: $empId, appliedForDate: $appliedForDate, appliedDate: $appliedDate, type: $type, justification: $justification, status: $status, managerRemarks: $managerRemarks, supportingDocs: $supportingDocs, fromTime: $fromTime, toTime: $toTime, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -339,6 +366,9 @@ class _$RegularisationModelImpl extends _RegularisationModel {
               other._supportingDocs,
               _supportingDocs,
             ) &&
+            (identical(other.fromTime, fromTime) ||
+                other.fromTime == fromTime) &&
+            (identical(other.toTime, toTime) || other.toTime == toTime) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -358,6 +388,8 @@ class _$RegularisationModelImpl extends _RegularisationModel {
     status,
     managerRemarks,
     const DeepCollectionEquality().hash(_supportingDocs),
+    fromTime,
+    toTime,
     createdAt,
     updatedAt,
   );
@@ -390,8 +422,10 @@ abstract class _RegularisationModel extends RegularisationModel {
     required final RegularisationStatus status,
     final String? managerRemarks,
     final List<String> supportingDocs,
-    required final DateTime createdAt,
-    required final DateTime updatedAt,
+    final String? fromTime,
+    final String? toTime,
+    final DateTime? createdAt,
+    final DateTime? updatedAt,
   }) = _$RegularisationModelImpl;
   const _RegularisationModel._() : super._();
 
@@ -403,23 +437,27 @@ abstract class _RegularisationModel extends RegularisationModel {
   @override
   String get empId; // emp_id
   @override
-  DateTime get appliedForDate; // reg_applied_for_date
+  DateTime get appliedForDate; // reg_applied_for_date (main date)
   @override
-  DateTime get appliedDate; // reg_date_applied
+  DateTime get appliedDate; // reg_date_applied (application date)
   @override
-  RegularisationType get type; // reg_type - Full Day / Check-in Only etc.
+  RegularisationType get type;
   @override
-  String get justification; // reg_justification
+  String get justification;
   @override
-  RegularisationStatus get status; // reg_approval_status
+  RegularisationStatus get status;
   @override
-  String? get managerRemarks; // manager comments on approve/reject
+  String? get managerRemarks;
   @override
-  List<String> get supportingDocs; // future documents
+  List<String> get supportingDocs; // NEW: Time range for half-day/full-day regularisation
   @override
-  DateTime get createdAt;
+  String? get fromTime; // e.g., "09:00" (HH:mm string)
   @override
-  DateTime get updatedAt;
+  String? get toTime; // e.g., "18:00" (HH:mm string)
+  @override
+  DateTime? get createdAt;
+  @override
+  DateTime? get updatedAt;
 
   /// Create a copy of RegularisationModel
   /// with the given fields replaced by the non-null parameter values.

@@ -7,7 +7,11 @@
 import 'package:appattendance/core/providers/view_mode_provider.dart';
 import 'package:appattendance/core/utils/app_colors.dart';
 import 'package:appattendance/features/auth/domain/models/user_model.dart';
+import 'package:appattendance/features/auth/domain/models/user_extension.dart';
+import 'package:appattendance/features/auth/domain/models/user_role.dart';
+import 'package:appattendance/features/auth/domain/models/user_db_mapper.dart';
 import 'package:appattendance/features/auth/presentation/providers/auth_provider.dart';
+import 'package:appattendance/features/dashboard/presentation/providers/dashboard_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -85,7 +89,15 @@ class AppDrawer extends ConsumerWidget {
                                   color: Colors.white.withOpacity(0.4),
                                   width: 3,
                                 ),
+                                //   image: DecorationImage(
+                                //     image: NetworkImage(
+                                //       user?.avatarUrl ??
+                                //           'https://ui-avatars.com/api/?name=User',
+                                //     ),
+                                //     fit: BoxFit.cover,
+                                //   ),
                               ),
+
                               child: const Center(
                                 child: Icon(
                                   Icons.person_rounded,
@@ -228,11 +240,29 @@ class AppDrawer extends ConsumerWidget {
                             activeColor: Colors.green,
                             inactiveThumbColor: Colors.orange,
                             onChanged: (value) {
-                              ref.read(viewModeProvider.notifier).state = value
+                              final newMode = value
                                   ? ViewMode.employee
                                   : ViewMode.manager;
+                              ref.read(viewModeProvider.notifier).state =
+                                  newMode;
+
+                              // IMPORTANT: Toggle change pe dashboard refresh
+                              ref.invalidate(dashboardProvider);
                             },
                           ),
+
+                          // Switch(
+                          //   value:
+                          //       ref.watch(viewModeProvider) ==
+                          //       ViewMode.employee,
+                          //   activeColor: Colors.green,
+                          //   inactiveThumbColor: Colors.orange,
+                          //   onChanged: (value) {
+                          //     ref.read(viewModeProvider.notifier).state = value
+                          //         ? ViewMode.employee
+                          //         : ViewMode.manager;
+                          //   },
+                          // ),
                         ],
                       ),
                     ),

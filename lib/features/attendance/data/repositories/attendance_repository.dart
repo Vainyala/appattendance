@@ -1,11 +1,12 @@
 // lib/features/attendance/domain/repositories/attendance_repository.dart
-// Interface for Attendance feature - defines contract for data operations
-// Supports employee check-in/out + manager team view (privileges R01-R08)
+// Updated: syncOfflineQueue now accepts WidgetRef (widget se call ke liye)
 
 import 'package:appattendance/features/attendance/domain/models/attendance_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 abstract class AttendanceRepository {
-  /// Check-in with location & verification
+  Future<List<AttendanceModel>> getTodayAttendance(String empId);
+
   Future<void> checkIn({
     required String empId,
     required double latitude,
@@ -14,9 +15,10 @@ abstract class AttendanceRepository {
     String? geofenceName,
     String? projectId,
     String? notes,
+    String? photoProofPath,
+    bool offlineQueue = false,
   });
 
-  /// Check-out
   Future<void> checkOut({
     required String empId,
     required double latitude,
@@ -25,24 +27,75 @@ abstract class AttendanceRepository {
     String? geofenceName,
     String? projectId,
     String? notes,
+    bool offlineQueue = false,
   });
 
-  /// Get today's attendance records for user
-  Future<List<AttendanceModel>> getTodayAttendance(String empId);
-
-  /// Get attendance history in date range (for reports)
-  Future<List<AttendanceModel>> getHistory(
+  Future<List<AttendanceModel>> getAttendanceHistory(
     String empId,
     DateTime start,
     DateTime end,
   );
 
-  /// Get team attendance on specific date (for manager only)
+  Future<Map<String, dynamic>> getTodayStatusSummary(String empId);
+
   Future<List<AttendanceModel>> getTeamAttendance(
     String mgrEmpId,
     DateTime date,
   );
+
+  // Updated: Accepts WidgetRef for widget context
+  Future<void> syncOfflineQueue(WidgetRef widgetRef);
 }
+
+// // lib/features/attendance/domain/repositories/attendance_repository.dart
+// // Interface for Attendance feature - defines contract for data operations
+// // Supports employee check-in/out + manager team view (privileges R01-R08)
+
+// import 'package:appattendance/features/attendance/domain/models/attendance_model.dart';
+
+// abstract class AttendanceRepository {
+//   Future<List<AttendanceModel>> getTodayAttendance(String empId);
+
+//   /// Check-in with location & verification
+//   Future<void> checkIn({
+//     required String empId,
+//     required double latitude,
+//     required double longitude,
+//     required VerificationType verificationType,
+//     String? geofenceName,
+//     String? projectId,
+//     String? notes,
+//     String? photoProofPath,
+//   });
+
+//   /// Check-out
+//   Future<void> checkOut({
+//     required String empId,
+//     required double latitude,
+//     required double longitude,
+//     required VerificationType verificationType,
+//     String? geofenceName,
+//     String? projectId,
+//     String? notes,
+//   });
+
+//   /// Get today's attendance records for user
+//   // Future<List<AttendanceModel>> getTodayAttendance(String empId);
+
+//   /// Get attendance history in date range (for reports)
+//   Future<List<AttendanceModel>> getAttendanceHistory(
+//     String empId,
+//     DateTime start,
+//     DateTime end,
+//   );
+//   Future<Map<String, dynamic>> getTodayStatusSummary(String empId);
+
+//   /// Get team attendance on specific date (for manager only)
+//   Future<List<AttendanceModel>> getTeamAttendance(
+//     String mgrEmpId,
+//     DateTime date,
+//   );
+// }
 
 // // lib/features/attendance/domain/repositories/attendance_repository.dart
 

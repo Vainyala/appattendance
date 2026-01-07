@@ -1,21 +1,29 @@
 // lib/main.dart
 import 'package:appattendance/app.dart';
 import 'package:appattendance/core/providers/theme_notifier.dart';
+import 'package:appattendance/core/utils/app_colors.dart';
+import 'package:appattendance/features/attendance/data/services/offline_attendance_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart'; // kDebugMode ke liye
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:workmanager/workmanager.dart';
+
+// Top-level Workmanager callback (app.dart se move kiya gaya yahan)
+@pragma('vm:entry-point')
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    if (task == "syncOfflineAttendance") {
+      await OfflineAttendanceService.backgroundSyncCallback();
+    }
+    return Future.value(true);
+  });
+}
 
 void main() async {
-  // Yeh line sabse pehle — SharedPreferences, DB, FCM sab ke liye zaroori
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Agar tere paas LocalDB.init() hai aur use kar raha hai toh rakh sakta hai
-  // Warna comment kar de (abhi hum MongoDB use kar rahe hain)
-  // await LocalDB.init();
-
-  // Future mein agar Firebase FCM chahiye toh yahan uncomment kar dena
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
+  // Workmanager initialize
+  await Workmanager().initialize(callbackDispatcher, isInDebugMode: kDebugMode);
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -25,43 +33,49 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Live theme mode (dark/light toggle)
     final themeMode = ref.watch(themeProvider);
 
     return MaterialApp(
-      title: 'Nutantek Attendance',
+      title: 'Nutantek Attendance Pro',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
+      theme: ThemeData.light().copyWith(
         useMaterial3: true,
-        fontFamily: 'Poppins',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0066FF),
+          seedColor: AppColors.primary,
           brightness: Brightness.light,
         ),
-        scaffoldBackgroundColor: Colors.grey[50],
+        scaffoldBackgroundColor: AppColors.backgroundLight,
         appBarTheme: const AppBarTheme(
-          centerTitle: true,
+          backgroundColor: AppColors.primary,
+          foregroundColor: Colors.white,
           elevation: 0,
-          backgroundColor: Colors.transparent,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
         ),
       ),
-      darkTheme: ThemeData(
+      darkTheme: ThemeData.dark().copyWith(
         useMaterial3: true,
-        fontFamily: 'Poppins',
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0066FF),
+          seedColor: AppColors.primary,
           brightness: Brightness.dark,
         ),
-        scaffoldBackgroundColor: Colors.black,
-        appBarTheme: const AppBarTheme(
-          centerTitle: true,
+        scaffoldBackgroundColor: AppColors.backgroundDark,
+        appBarTheme: AppBarTheme(
+          backgroundColor: AppColors.primary.withOpacity(0.9),
+          foregroundColor: Colors.white,
           elevation: 0,
-          backgroundColor: Colors.transparent,
         ),
       ),
-      themeMode: themeMode, // ← Dark/Light auto switch
-      home:
-          const App(), // ← Yahan se routing handle hota hai (Splash → Login → Dashboard)
+      themeMode: themeMode,
+      home: const App(), // ← App.dart ko sirf routing ke liye use kar rahe
     );
   }
 }

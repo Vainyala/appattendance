@@ -6,6 +6,9 @@
 import 'package:appattendance/core/utils/app_colors.dart';
 import 'package:appattendance/features/attendance/domain/models/attendance_model.dart';
 import 'package:appattendance/features/auth/domain/models/user_model.dart';
+import 'package:appattendance/features/auth/domain/models/user_extension.dart';
+import 'package:appattendance/features/auth/domain/models/user_role.dart';
+import 'package:appattendance/features/auth/domain/models/user_db_mapper.dart';
 import 'package:appattendance/features/dashboard/presentation/providers/dashboard_notifier.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -146,6 +149,7 @@ class AttendanceCalendarWidget extends ConsumerWidget {
         attId: '',
         empId: '',
         timestamp: date,
+        attendanceDate: date, // ← REQUIRED FIELD FIX: Add this line
         status: AttendanceStatus.checkIn, // Default absent
       ),
     );

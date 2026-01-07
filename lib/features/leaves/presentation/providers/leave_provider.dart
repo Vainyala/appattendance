@@ -1,6 +1,6 @@
 // lib/features/leaves/presentation/providers/leave_provider.dart
-import 'package:appattendance/features/leaves/data/repository/leave_repository.dart';
-import 'package:appattendance/features/leaves/data/repository/leave_repository_impl.dart';
+import 'package:appattendance/features/leaves/data/repositories/leave_repository.dart';
+import 'package:appattendance/features/leaves/data/repositories/leave_repository_impl.dart';
 import 'package:appattendance/features/leaves/domain/models/leave_model.dart';
 import 'package:appattendance/features/leaves/presentation/providers/leave_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

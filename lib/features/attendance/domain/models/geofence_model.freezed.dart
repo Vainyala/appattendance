@@ -21,7 +21,7 @@ GeofenceModel _$GeofenceModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$GeofenceModel {
-  String get id =>
+  String get geoId =>
       throw _privateConstructorUsedError; // e.g., "OFFICE_MAIN" or UUID
   String get name =>
       throw _privateConstructorUsedError; // "Main Office", "Client Site A"
@@ -52,7 +52,7 @@ abstract class $GeofenceModelCopyWith<$Res> {
   ) = _$GeofenceModelCopyWithImpl<$Res, GeofenceModel>;
   @useResult
   $Res call({
-    String id,
+    String geoId,
     String name,
     double latitude,
     double longitude,
@@ -79,7 +79,7 @@ class _$GeofenceModelCopyWithImpl<$Res, $Val extends GeofenceModel>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? geoId = null,
     Object? name = null,
     Object? latitude = null,
     Object? longitude = null,
@@ -91,9 +91,9 @@ class _$GeofenceModelCopyWithImpl<$Res, $Val extends GeofenceModel>
   }) {
     return _then(
       _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
+            geoId: null == geoId
+                ? _value.geoId
+                : geoId // ignore: cast_nullable_to_non_nullable
                       as String,
             name: null == name
                 ? _value.name
@@ -143,7 +143,7 @@ abstract class _$$GeofenceModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    String id,
+    String geoId,
     String name,
     double latitude,
     double longitude,
@@ -169,7 +169,7 @@ class __$$GeofenceModelImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? geoId = null,
     Object? name = null,
     Object? latitude = null,
     Object? longitude = null,
@@ -181,9 +181,9 @@ class __$$GeofenceModelImplCopyWithImpl<$Res>
   }) {
     return _then(
       _$GeofenceModelImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
+        geoId: null == geoId
+            ? _value.geoId
+            : geoId // ignore: cast_nullable_to_non_nullable
                   as String,
         name: null == name
             ? _value.name
@@ -226,7 +226,7 @@ class __$$GeofenceModelImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$GeofenceModelImpl extends _GeofenceModel {
   const _$GeofenceModelImpl({
-    required this.id,
+    required this.geoId,
     required this.name,
     required this.latitude,
     required this.longitude,
@@ -241,7 +241,7 @@ class _$GeofenceModelImpl extends _GeofenceModel {
       _$$GeofenceModelImplFromJson(json);
 
   @override
-  final String id;
+  final String geoId;
   // e.g., "OFFICE_MAIN" or UUID
   @override
   final String name;
@@ -266,7 +266,7 @@ class _$GeofenceModelImpl extends _GeofenceModel {
 
   @override
   String toString() {
-    return 'GeofenceModel(id: $id, name: $name, latitude: $latitude, longitude: $longitude, radiusMeters: $radiusMeters, isActive: $isActive, address: $address, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'GeofenceModel(geoId: $geoId, name: $name, latitude: $latitude, longitude: $longitude, radiusMeters: $radiusMeters, isActive: $isActive, address: $address, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -274,7 +274,7 @@ class _$GeofenceModelImpl extends _GeofenceModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$GeofenceModelImpl &&
-            (identical(other.id, id) || other.id == id) &&
+            (identical(other.geoId, geoId) || other.geoId == geoId) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.latitude, latitude) ||
                 other.latitude == latitude) &&
@@ -295,7 +295,7 @@ class _$GeofenceModelImpl extends _GeofenceModel {
   @override
   int get hashCode => Object.hash(
     runtimeType,
-    id,
+    geoId,
     name,
     latitude,
     longitude,
@@ -322,7 +322,7 @@ class _$GeofenceModelImpl extends _GeofenceModel {
 
 abstract class _GeofenceModel extends GeofenceModel {
   const factory _GeofenceModel({
-    required final String id,
+    required final String geoId,
     required final String name,
     required final double latitude,
     required final double longitude,
@@ -338,7 +338,7 @@ abstract class _GeofenceModel extends GeofenceModel {
       _$GeofenceModelImpl.fromJson;
 
   @override
-  String get id; // e.g., "OFFICE_MAIN" or UUID
+  String get geoId; // e.g., "OFFICE_MAIN" or UUID
   @override
   String get name; // "Main Office", "Client Site A"
   @override

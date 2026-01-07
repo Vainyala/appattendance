@@ -1,37 +1,47 @@
-// lib/features/splash/presentation/screens/splash_screen.dart
-
+// lib/features/dashboard/presentation/screens/splash_screen.dart
+import 'dart:async';
 import 'package:appattendance/core/database/db_helper.dart';
+import 'package:appattendance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:appattendance/features/auth/presentation/screens/device_verification_screen.dart';
 import 'package:appattendance/features/auth/presentation/screens/login_screen.dart';
 import 'package:appattendance/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
 
+  Timer? _navigationTimer;
+
   @override
   void initState() {
     super.initState();
     _initializeAnimations();
-    _navigateAfterSplash();
+
+    // Auth ko background mein warm-up karo (non-blocking)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(authProvider); // Sirf read karo, heavy work background mein
+    });
+
+    _startNavigation();
   }
 
   void _initializeAnimations() {
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 2000),
     );
 
     _scaleAnimation = Tween<double>(
@@ -45,59 +55,82 @@ class _SplashScreenState extends State<SplashScreen>
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     _slideAnimation = Tween<Offset>(
-      begin: Offset(0, 0.3),
+      begin: const Offset(0, 0.3),
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _controller.forward();
   }
 
+  void _startNavigation() {
+    const splashDuration = Duration(
+      milliseconds: 1800,
+    ); // Reduced for faster feel
+    _navigationTimer = Timer(splashDuration, () {
+      if (!mounted) return;
+      _navigateAfterSplash();
+    });
+  }
+
   Future<void> _navigateAfterSplash() async {
-    // Splash dikhao 2.5 seconds
-    await Future.delayed(const Duration(milliseconds: 2500));
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final bool isDeviceVerified =
+          prefs.getBool('is_device_verified') ?? false;
 
-    if (!mounted) return;
+      Widget nextScreen;
 
-    final prefs = await SharedPreferences.getInstance();
-    final bool isDeviceVerified = prefs.getBool('is_device_verified') ?? false;
+      if (!isDeviceVerified) {
+        nextScreen = const DeviceVerificationScreen();
+      } else {
+        final authState = ref.read(authProvider);
+        nextScreen = authState.when(
+          data: (user) =>
+              user != null ? const DashboardScreen() : const LoginScreen(),
+          loading: () =>
+              const Scaffold(body: Center(child: CircularProgressIndicator())),
+          error: (_, __) => const LoginScreen(),
+        );
+      }
 
-    Widget nextScreen;
-
-    if (!isDeviceVerified) {
-      // First time ya new device → Device verification dikhao
-      nextScreen = const DeviceVerificationScreen();
-    } else {
-      // Device already verified → Check login status
-      final currentUser = await DBHelper.instance.getCurrentUser();
-      nextScreen = currentUser != null
-          ? const DashboardScreen()
-          : const LoginScreen();
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+            transitionDuration: const Duration(milliseconds: 400),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Startup error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
-
-    Navigator.pushReplacement(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-        transitionDuration: Duration(milliseconds: 600),
-      ),
-    );
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _navigationTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Tere original beautiful splash UI yahan rahegi
-    // Logo, Nutantek text, tagline, copyright — sab same
-    // Main ne sirf logic update kiya hai
-
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -108,7 +141,7 @@ class _SplashScreenState extends State<SplashScreen>
             end: Alignment.bottomRight,
             colors: isDark
                 ? [Colors.black, Colors.grey[900]!]
-                : [Color(0xFF4A90E2).withOpacity(0.08), Colors.white],
+                : [const Color(0xFF4A90E2).withOpacity(0.08), Colors.white],
           ),
         ),
         child: Center(
@@ -121,13 +154,13 @@ class _SplashScreenState extends State<SplashScreen>
                   width: 110,
                   height: 110,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                       colors: [Color(0xFF4A90E2), Color(0xFF2171C9)],
                     ),
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0xFF4A90E2).withOpacity(0.4),
+                        color: const Color(0xFF4A90E2).withOpacity(0.4),
                         blurRadius: 30,
                       ),
                     ],
@@ -137,7 +170,7 @@ class _SplashScreenState extends State<SplashScreen>
                       'assets/images/nutantek_logo.png',
                       width: 70,
                       height: 70,
-                      errorBuilder: (_, __, ___) => Icon(
+                      errorBuilder: (_, __, ___) => const Icon(
                         Icons.business_center,
                         size: 60,
                         color: Colors.white,
@@ -146,7 +179,7 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               FadeTransition(
                 opacity: _fadeAnimation,
                 child: SlideTransition(
@@ -161,17 +194,17 @@ class _SplashScreenState extends State<SplashScreen>
                           color: isDark ? Colors.white : Colors.black87,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Container(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Color(0xFF4A90E2).withOpacity(0.2),
+                          color: const Color(0xFF4A90E2).withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
+                        child: const Text(
                           'ATTENDANCE PRO',
                           style: TextStyle(
                             fontSize: 14,
@@ -191,6 +224,424 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 }
+
+// // lib/features/splash/presentation/screens/splash_screen.dart
+// // FINAL Upgraded & Error-Free Version (01 Jan 2026)
+// // Enhanced: Safe navigation (mounted check), Riverpod auth, session timeout sync
+// // Smooth animations, dark mode, error handling, config delay
+
+// import 'dart:async';
+// import 'package:appattendance/core/database/db_helper.dart';
+// import 'package:appattendance/features/auth/presentation/providers/auth_provider.dart';
+// import 'package:appattendance/features/auth/presentation/screens/device_verification_screen.dart';
+// import 'package:appattendance/features/auth/presentation/screens/login_screen.dart';
+// import 'package:appattendance/features/dashboard/presentation/screens/dashboard_screen.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
+
+// class SplashScreen extends ConsumerStatefulWidget {
+//   const SplashScreen({super.key});
+
+//   @override
+//   ConsumerState<SplashScreen> createState() => _SplashScreenState();
+// }
+
+// class _SplashScreenState extends ConsumerState<SplashScreen>
+//     with SingleTickerProviderStateMixin {
+//   late AnimationController _controller;
+//   late Animation<double> _scaleAnimation;
+//   late Animation<double> _fadeAnimation;
+//   late Animation<Offset> _slideAnimation;
+
+//   Timer? _navigationTimer;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _initializeAnimations();
+//     _startNavigation();
+//   }
+
+//   void _initializeAnimations() {
+//     _controller = AnimationController(
+//       vsync: this,
+//       duration: const Duration(milliseconds: 2000),
+//     );
+
+//     _scaleAnimation = Tween<double>(
+//       begin: 0.5,
+//       end: 1.0,
+//     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+
+//     _fadeAnimation = Tween<double>(
+//       begin: 0.0,
+//       end: 1.0,
+//     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+//     _slideAnimation = Tween<Offset>(
+//       begin: const Offset(0, 0.3),
+//       end: Offset.zero,
+//     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+
+//     _controller.forward();
+//   }
+
+//   void _startNavigation() {
+//     // Configurable delay (easy to change)
+//     const splashDuration = Duration(milliseconds: 2500);
+
+//     _navigationTimer = Timer(splashDuration, () {
+//       if (!mounted) return; // Prevent unmount crash
+
+//       _navigateAfterSplash();
+//     });
+//   }
+
+//   Future<void> _navigateAfterSplash() async {
+//     try {
+//       final prefs = await SharedPreferences.getInstance();
+//       final bool isDeviceVerified =
+//           prefs.getBool('is_device_verified') ?? false;
+
+//       Widget nextScreen;
+
+//       if (!isDeviceVerified) {
+//         nextScreen = const DeviceVerificationScreen();
+//       } else {
+//         // Riverpod auth state check (real-time)
+//         final authState = ref.read(authProvider);
+//         nextScreen = authState.when(
+//           loading: () =>
+//               const Scaffold(body: Center(child: CircularProgressIndicator())),
+//           error: (_, __) => const LoginScreen(),
+//           data: (user) =>
+//               user != null ? const DashboardScreen() : const LoginScreen(),
+//         );
+//       }
+
+//       if (mounted) {
+//         Navigator.pushReplacement(
+//           context,
+//           PageRouteBuilder(
+//             pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
+//             transitionsBuilder:
+//                 (context, animation, secondaryAnimation, child) {
+//                   return FadeTransition(opacity: animation, child: child);
+//                 },
+//             transitionDuration: const Duration(milliseconds: 600),
+//           ),
+//         );
+//       }
+//     } catch (e) {
+//       if (mounted) {
+//         Navigator.pushReplacement(
+//           context,
+//           MaterialPageRoute(builder: (_) => const LoginScreen()),
+//         );
+//         ScaffoldMessenger.of(
+//           context,
+//         ).showSnackBar(SnackBar(content: Text('Startup error: $e')));
+//       }
+//     }
+//   }
+
+//   @override
+//   void dispose() {
+//     _controller.dispose();
+//     _navigationTimer?.cancel();
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+//     return Scaffold(
+//       body: Container(
+//         decoration: BoxDecoration(
+//           gradient: LinearGradient(
+//             begin: Alignment.topLeft,
+//             end: Alignment.bottomRight,
+//             colors: isDark
+//                 ? [Colors.black, Colors.grey[900]!]
+//                 : [const Color(0xFF4A90E2).withOpacity(0.08), Colors.white],
+//           ),
+//         ),
+//         child: Center(
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.center,
+//             children: [
+//               ScaleTransition(
+//                 scale: _scaleAnimation,
+//                 child: Container(
+//                   width: 110,
+//                   height: 110,
+//                   decoration: BoxDecoration(
+//                     gradient: const LinearGradient(
+//                       colors: [Color(0xFF4A90E2), Color(0xFF2171C9)],
+//                     ),
+//                     borderRadius: BorderRadius.circular(24),
+//                     boxShadow: [
+//                       BoxShadow(
+//                         color: const Color(0xFF4A90E2).withOpacity(0.4),
+//                         blurRadius: 30,
+//                       ),
+//                     ],
+//                   ),
+//                   child: Center(
+//                     child: Image.asset(
+//                       'assets/images/nutantek_logo.png',
+//                       width: 70,
+//                       height: 70,
+//                       errorBuilder: (_, __, ___) => const Icon(
+//                         Icons.business_center,
+//                         size: 60,
+//                         color: Colors.white,
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//               ),
+//               const SizedBox(height: 40),
+//               FadeTransition(
+//                 opacity: _fadeAnimation,
+//                 child: SlideTransition(
+//                   position: _slideAnimation,
+//                   child: Column(
+//                     children: [
+//                       Text(
+//                         'Nutantek',
+//                         style: TextStyle(
+//                           fontSize: 36,
+//                           fontWeight: FontWeight.w800,
+//                           color: isDark ? Colors.white : Colors.black87,
+//                         ),
+//                       ),
+//                       const SizedBox(height: 8),
+//                       Container(
+//                         padding: const EdgeInsets.symmetric(
+//                           horizontal: 16,
+//                           vertical: 6,
+//                         ),
+//                         decoration: BoxDecoration(
+//                           color: const Color(0xFF4A90E2).withOpacity(0.2),
+//                           borderRadius: BorderRadius.circular(12),
+//                         ),
+//                         child: const Text(
+//                           'ATTENDANCE PRO',
+//                           style: TextStyle(
+//                             fontSize: 14,
+//                             fontWeight: FontWeight.w600,
+//                             color: Color(0xFF4A90E2),
+//                           ),
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// // lib/features/splash/presentation/screens/splash_screen.dart
+
+// import 'package:appattendance/core/database/db_helper.dart';
+// import 'package:appattendance/features/auth/presentation/screens/device_verification_screen.dart';
+// import 'package:appattendance/features/auth/presentation/screens/login_screen.dart';
+// import 'package:appattendance/features/dashboard/presentation/screens/dashboard_screen.dart';
+// import 'package:flutter/material.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
+
+// class SplashScreen extends StatefulWidget {
+//   const SplashScreen({super.key});
+
+//   @override
+//   State<SplashScreen> createState() => _SplashScreenState();
+// }
+
+// class _SplashScreenState extends State<SplashScreen>
+//     with SingleTickerProviderStateMixin {
+//   late AnimationController _controller;
+//   late Animation<double> _scaleAnimation;
+//   late Animation<double> _fadeAnimation;
+//   late Animation<Offset> _slideAnimation;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _initializeAnimations();
+//     _navigateAfterSplash();
+//   }
+
+//   void _initializeAnimations() {
+//     _controller = AnimationController(
+//       vsync: this,
+//       duration: Duration(milliseconds: 2000),
+//     );
+
+//     _scaleAnimation = Tween<double>(
+//       begin: 0.5,
+//       end: 1.0,
+//     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+
+//     _fadeAnimation = Tween<double>(
+//       begin: 0.0,
+//       end: 1.0,
+//     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+//     _slideAnimation = Tween<Offset>(
+//       begin: Offset(0, 0.3),
+//       end: Offset.zero,
+//     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+
+//     _controller.forward();
+//   }
+
+//   Future<void> _navigateAfterSplash() async {
+//     // Splash dikhao 2.5 seconds
+//     await Future.delayed(const Duration(milliseconds: 2500));
+
+//     if (!mounted) return;
+
+//     final prefs = await SharedPreferences.getInstance();
+//     final bool isDeviceVerified = prefs.getBool('is_device_verified') ?? false;
+
+//     Widget nextScreen;
+
+//     if (!isDeviceVerified) {
+//       // First time ya new device → Device verification dikhao
+//       nextScreen = const DeviceVerificationScreen();
+//     } else {
+//       // Device already verified → Check login status
+//       final currentUser = await DBHelper.instance.getCurrentUser();
+//       nextScreen = currentUser != null
+//           ? const DashboardScreen()
+//           : const LoginScreen();
+//     }
+
+//     Navigator.pushReplacement(
+//       context,
+//       PageRouteBuilder(
+//         pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
+//         transitionsBuilder: (context, animation, secondaryAnimation, child) {
+//           return FadeTransition(opacity: animation, child: child);
+//         },
+//         transitionDuration: Duration(milliseconds: 600),
+//       ),
+//     );
+//   }
+
+//   @override
+//   void dispose() {
+//     _controller.dispose();
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     // Tere original beautiful splash UI yahan rahegi
+//     // Logo, Nutantek text, tagline, copyright — sab same
+//     // Main ne sirf logic update kiya hai
+
+//     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+//     return Scaffold(
+//       body: Container(
+//         decoration: BoxDecoration(
+//           gradient: LinearGradient(
+//             begin: Alignment.topLeft,
+//             end: Alignment.bottomRight,
+//             colors: isDark
+//                 ? [Colors.black, Colors.grey[900]!]
+//                 : [Color(0xFF4A90E2).withOpacity(0.08), Colors.white],
+//           ),
+//         ),
+//         child: Center(
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.center,
+//             children: [
+//               ScaleTransition(
+//                 scale: _scaleAnimation,
+//                 child: Container(
+//                   width: 110,
+//                   height: 110,
+//                   decoration: BoxDecoration(
+//                     gradient: LinearGradient(
+//                       colors: [Color(0xFF4A90E2), Color(0xFF2171C9)],
+//                     ),
+//                     borderRadius: BorderRadius.circular(24),
+//                     boxShadow: [
+//                       BoxShadow(
+//                         color: Color(0xFF4A90E2).withOpacity(0.4),
+//                         blurRadius: 30,
+//                       ),
+//                     ],
+//                   ),
+//                   child: Center(
+//                     child: Image.asset(
+//                       'assets/images/nutantek_logo.png',
+//                       width: 70,
+//                       height: 70,
+//                       errorBuilder: (_, __, ___) => Icon(
+//                         Icons.business_center,
+//                         size: 60,
+//                         color: Colors.white,
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//               ),
+//               SizedBox(height: 40),
+//               FadeTransition(
+//                 opacity: _fadeAnimation,
+//                 child: SlideTransition(
+//                   position: _slideAnimation,
+//                   child: Column(
+//                     children: [
+//                       Text(
+//                         'Nutantek',
+//                         style: TextStyle(
+//                           fontSize: 36,
+//                           fontWeight: FontWeight.w800,
+//                           color: isDark ? Colors.white : Colors.black87,
+//                         ),
+//                       ),
+//                       SizedBox(height: 8),
+//                       Container(
+//                         padding: EdgeInsets.symmetric(
+//                           horizontal: 16,
+//                           vertical: 6,
+//                         ),
+//                         decoration: BoxDecoration(
+//                           color: Color(0xFF4A90E2).withOpacity(0.2),
+//                           borderRadius: BorderRadius.circular(12),
+//                         ),
+//                         child: Text(
+//                           'ATTENDANCE PRO',
+//                           style: TextStyle(
+//                             fontSize: 14,
+//                             fontWeight: FontWeight.w600,
+//                             color: Color(0xFF4A90E2),
+//                           ),
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 // // lib/features/splash/presentation/screens/splash_screen.dart
 // import 'package:appattendance/core/database/db_helper.dart';
