@@ -1,9 +1,3 @@
-// lib/features/attendance/presentation/widgets/employee_overview.dart
-// Employee Overview Widget for Manager View (Toggle State 2)
-// Shows list of team members with cards (name, photo/avatar, designation, status, projects)
-// Card tap → EmployeeIndividualDetailsScreen (selected period data)
-// Period-based data (selected period se filter)
-
 import 'package:appattendance/core/utils/app_colors.dart';
 import 'package:appattendance/features/attendance/domain/models/analytics_model.dart';
 import 'package:appattendance/features/attendance/presentation/providers/analytics_provider.dart';

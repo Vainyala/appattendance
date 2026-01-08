@@ -20,6 +20,15 @@ final teamProjectProvider =
       return TeamProjectNotifier(ref);
     });
 
+// 3. NEW: Single Project by ID (family provider for dynamic projectId)
+final projectByIdProvider = FutureProvider.family<ProjectModel?, String>((
+  ref,
+  projectId,
+) async {
+  final repo = ref.read(projectRepositoryProvider);
+  return await repo.getProjectById(projectId);
+});
+
 // // lib/features/project/presentation/providers/project_provider.dart
 // import 'package:appattendance/features/projects/domain/models/project_model.dart';
 // import 'package:appattendance/features/projects/presentation/providers/project_notifier.dart';

@@ -11,8 +11,8 @@ _$TeamMemberAnalyticsImpl _$$TeamMemberAnalyticsImplFromJson(
 ) => _$TeamMemberAnalyticsImpl(
   empId: json['empId'] as String,
   name: json['name'] as String,
-  designation: json['designation'] as String,
-  email: json['email'] as String,
+  designation: json['designation'] as String?,
+  email: json['email'] as String?,
   phone: json['phone'] as String?,
   status:
       $enumDecodeNullable(_$UserStatusEnumMap, json['status']) ??

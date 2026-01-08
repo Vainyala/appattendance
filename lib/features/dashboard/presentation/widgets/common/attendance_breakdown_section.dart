@@ -1,6 +1,6 @@
 // lib/features/dashboard/presentation/widgets/common/attendance_breakdown_section.dart
 // Upgraded: Real data from DashboardNotifier + role-based
-// Dynamic pie chart + stats + loading/error + dark mode
+// Dynamic pie chart + stats + loading/error
 // Current date: December 29, 2025
 
 import 'package:appattendance/core/utils/app_colors.dart';

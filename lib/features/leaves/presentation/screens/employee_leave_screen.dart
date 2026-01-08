@@ -1,9 +1,8 @@
 // lib/features/leaves/presentation/screens/employee_leave_screen.dart
-// FINAL UPGRADED & POLISHED VERSION - January 06, 2026
-// Modern gradient UI, month filter, MonthlyOverviewWidget added
-// Null-safe, real-time data from myLeavesProvider, employee view only
+// FINAL FIXED & POLISHED VERSION - January 08, 2026
+// Null-safe, handles null/invalid leaves, no type cast error
+// Modern gradient UI, month filter, MonthlyOverviewWidget
 // Responsive, dark mode, pull-to-refresh, no overflow
-// UI/UX same (layout, colors, components) but enhanced with smoothness
 
 import 'package:appattendance/core/theme/app_gradients.dart';
 import 'package:appattendance/core/utils/app_colors.dart';
@@ -21,10 +20,8 @@ import 'package:intl/intl.dart';
 
 class EmployeeLeaveScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic> user;
-  const EmployeeLeaveScreen({
-    super.key,
-    required this.user, // ← Make it required
-  });
+  const EmployeeLeaveScreen({super.key, required this.user});
+
   @override
   ConsumerState<EmployeeLeaveScreen> createState() =>
       _EmployeeLeaveScreenState();
@@ -41,41 +38,8 @@ class _EmployeeLeaveScreenState extends ConsumerState<EmployeeLeaveScreen> {
     final leavesAsync = ref.watch(myLeavesProvider);
 
     return Scaffold(
-      // extendBodyBehindAppBar: true,
-      // appBar: AppBar(
-      //   title: const Text('My Leaves'),
-      //   centerTitle: true,
-      //   backgroundColor: Colors.transparent,
-      //   elevation: 0,
-      //   foregroundColor: Colors.white,
-      //   actions: [
-      //     IconButton(
-      //       icon: _isRefreshing
-      //           ? const SizedBox(
-      //               height: 24,
-      //               width: 24,
-      //               child: CircularProgressIndicator(
-      //                 color: Colors.white,
-      //                 strokeWidth: 3,
-      //               ),
-      //             )
-      //           : const Icon(Icons.refresh),
-      //       onPressed: _isRefreshing
-      //           ? null
-      //           : () async {
-      //               setState(() => _isRefreshing = true);
-      //               await ref.read(myLeavesProvider.notifier).refresh();
-      //               setState(() => _isRefreshing = false);
-      //             },
-      //     ),
-      //   ],
-      // ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: AppGradients.dashboard(
-            Theme.of(context).brightness == Brightness.dark,
-          ),
-        ),
+        decoration: BoxDecoration(gradient: AppGradients.dashboard(isDark)),
         child: RefreshIndicator(
           onRefresh: () async {
             setState(() => _isRefreshing = true);
@@ -89,17 +53,14 @@ class _EmployeeLeaveScreenState extends ConsumerState<EmployeeLeaveScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Month Filter
                   MonthFilterWidget(
-                    initialMonth: _selectedMonth,
-                    onMonthChanged: (newMonth) {
-                      setState(() => _selectedMonth = newMonth);
-                    },
+                    selectedMonth: _selectedMonth,
+                    onMonthChanged: (newMonth) =>
+                        setState(() => _selectedMonth = newMonth),
                   ),
 
                   const SizedBox(height: 24),
 
-                  // Monthly Overview Widget (now called here)
                   authAsync.when(
                     data: (user) {
                       if (user == null) {
@@ -117,15 +78,21 @@ class _EmployeeLeaveScreenState extends ConsumerState<EmployeeLeaveScreen> {
 
                       return leavesAsync.when(
                         data: (leaves) {
-                          // Filter by selected month
+                          // Safe filter with null check
                           final filteredByMonth = leaves.where((leave) {
-                            final monthYear = DateFormat(
-                              'MMMM yyyy',
-                            ).format(leave.leaveFromDate);
-                            return monthYear == _selectedMonth;
+                            // Skip if date is null or invalid
+                            if (leave.leaveFromDate == null) return false;
+                            try {
+                              final monthYear = DateFormat(
+                                'MMMM yyyy',
+                              ).format(leave.leaveFromDate!);
+                              return monthYear == _selectedMonth;
+                            } catch (_) {
+                              return false; // Invalid date → skip
+                            }
                           }).toList();
 
-                          // Stats for MonthlyOverviewWidget
+                          // Stats (safe)
                           final total = filteredByMonth.length;
                           final pending = filteredByMonth
                               .where((l) => l.isPending)
@@ -136,13 +103,11 @@ class _EmployeeLeaveScreenState extends ConsumerState<EmployeeLeaveScreen> {
                           final rejected = filteredByMonth
                               .where((l) => l.isRejected)
                               .length;
-                          final avgShortfall =
-                              1.2; // TODO: Real calculation from DB
+                          final avgShortfall = 1.2; // TODO: Real calc
 
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Monthly Overview
                               MonthlyOverviewWidget(
                                 total: total,
                                 pending: pending,
@@ -155,12 +120,10 @@ class _EmployeeLeaveScreenState extends ConsumerState<EmployeeLeaveScreen> {
 
                               const SizedBox(height: 24),
 
-                              // Leave Filter Bar
                               const LeaveFilterBar(),
 
                               const SizedBox(height: 16),
 
-                              // Leave List
                               filteredByMonth.isEmpty
                                   ? const Center(
                                       child: Padding(
@@ -188,14 +151,30 @@ class _EmployeeLeaveScreenState extends ConsumerState<EmployeeLeaveScreen> {
                         },
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
-                        error: (err, stack) =>
-                            Center(child: Text('Error loading leaves: $err')),
+                        error: (err, stack) => Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(32),
+                            child: Text(
+                              'Error loading leaves: $err',
+                              style: const TextStyle(color: Colors.red),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
                       );
                     },
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
-                    error: (err, stack) =>
-                        Center(child: Text('Auth error: $err')),
+                    error: (err, stack) => Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Text(
+                          'Auth error: $err',
+                          style: const TextStyle(color: Colors.red),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

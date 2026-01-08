@@ -1,6 +1,3 @@
-// lib/features/attendance/domain/repositories/attendance_repository.dart
-// Updated: syncOfflineQueue now accepts WidgetRef (widget se call ke liye)
-
 import 'package:appattendance/features/attendance/domain/models/attendance_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

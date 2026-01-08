@@ -43,11 +43,6 @@ _$AnalyticsModelImpl _$$AnalyticsModelImplFromJson(
   insights:
       (json['insights'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const [],
-  activeProjects:
-      (json['activeProjects'] as List<dynamic>?)
-          ?.map((e) => ProjectAnalytics.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const [],
   totalDays: (json['totalDays'] as num?)?.toInt() ?? 0,
   presentDays: (json['presentDays'] as num?)?.toInt() ?? 0,
   absentDays: (json['absentDays'] as num?)?.toInt() ?? 0,
@@ -74,7 +69,6 @@ Map<String, dynamic> _$$AnalyticsModelImplToJson(
   'graphDataRaw': instance.graphDataRaw,
   'graphLabels': instance.graphLabels,
   'insights': instance.insights,
-  'activeProjects': instance.activeProjects,
   'totalDays': instance.totalDays,
   'presentDays': instance.presentDays,
   'absentDays': instance.absentDays,
@@ -119,38 +113,4 @@ Map<String, dynamic> _$$EmployeeAnalyticsImplToJson(
   'checkInTime': instance.checkInTime,
   'projects': instance.projects,
   'projectCount': instance.projectCount,
-};
-
-_$ProjectAnalyticsImpl _$$ProjectAnalyticsImplFromJson(
-  Map<String, dynamic> json,
-) => _$ProjectAnalyticsImpl(
-  projectId: json['projectId'] as String,
-  name: json['name'] as String,
-  description: json['description'] as String,
-  status: json['status'] as String? ?? 'ACTIVE',
-  priority: json['priority'] as String? ?? 'HIGH',
-  progress: (json['progress'] as num?)?.toDouble() ?? 0.0,
-  teamSize: (json['teamSize'] as num?)?.toInt() ?? 0,
-  totalTasks: (json['totalTasks'] as num?)?.toInt() ?? 0,
-  daysLeft: (json['daysLeft'] as num?)?.toInt() ?? 0,
-  teamMembers:
-      (json['teamMembers'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      const [],
-);
-
-Map<String, dynamic> _$$ProjectAnalyticsImplToJson(
-  _$ProjectAnalyticsImpl instance,
-) => <String, dynamic>{
-  'projectId': instance.projectId,
-  'name': instance.name,
-  'description': instance.description,
-  'status': instance.status,
-  'priority': instance.priority,
-  'progress': instance.progress,
-  'teamSize': instance.teamSize,
-  'totalTasks': instance.totalTasks,
-  'daysLeft': instance.daysLeft,
-  'teamMembers': instance.teamMembers,
 };

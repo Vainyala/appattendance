@@ -1,16 +1,10 @@
-// lib/features/leaves/presentation/widgets/apply_leave_notes_section.dart
-// FINAL SIMPLIFIED & PROFESSIONAL VERSION - January 08, 2026
-// Ultra-clean, minimal, premium look: subtle borders, focused textarea
-// Responsive, dark/light mode sync, smooth & intuitive
-// No visual noise, fast & elegant
-
 import 'package:appattendance/core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 
-class ApplyLeaveNotesSection extends StatelessWidget {
+class ApplyRegularisationReasonSection extends StatelessWidget {
   final TextEditingController controller;
 
-  const ApplyLeaveNotesSection({super.key, required this.controller});
+  const ApplyRegularisationReasonSection({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +15,7 @@ class ApplyLeaveNotesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Reason / Notes *',
+          'Reason / Justification *',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
@@ -29,17 +23,13 @@ class ApplyLeaveNotesSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-
         TextFormField(
           controller: controller,
           maxLines: 5,
           minLines: 4,
           decoration: InputDecoration(
-            hintText: 'Explain your leave reason in detail...',
-            hintStyle: TextStyle(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontSize: 14,
-            ),
+            hintText: 'Explain why you need regularisation...',
+            hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(color: theme.dividerColor),
@@ -59,14 +49,11 @@ class ApplyLeaveNotesSection extends StatelessWidget {
               vertical: 14,
             ),
           ),
-          style: TextStyle(fontSize: 15, color: theme.colorScheme.onSurface),
+          style: TextStyle(color: theme.colorScheme.onSurface),
           validator: (value) {
-            if (value == null || value.trim().isEmpty) {
+            if (value == null || value.trim().isEmpty)
               return 'Reason is required';
-            }
-            if (value.trim().length < 20) {
-              return 'Please provide more details (min 20 characters)';
-            }
+            if (value.trim().length < 20) return 'Min 20 characters';
             return null;
           },
         ),

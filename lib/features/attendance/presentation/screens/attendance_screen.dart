@@ -1,10 +1,3 @@
-// lib/features/attendance/presentation/screens/attendance_screen.dart
-// Manager Attendance Analytics Full Screen
-// Features: Period selector (6-month limit), stats row, toggle (Merge Graph / Employee Overview / Active Projects), download
-// Employee card click → individual details (current month history)
-// Active project card click → project details (black background)
-// Uses Riverpod for state, freezed models, and db_helper for data
-
 import 'package:appattendance/core/utils/app_colors.dart';
 import 'package:appattendance/features/attendance/domain/models/analytics_model.dart';
 import 'package:appattendance/features/attendance/presentation/providers/analytics_provider.dart';
@@ -16,7 +9,7 @@ import 'package:appattendance/features/attendance/presentation/widgets/analytics
 import 'package:appattendance/features/attendance/presentation/widgets/analytics/period_selector_widget.dart';
 import 'package:appattendance/features/attendance/presentation/widgets/analytics/statistics_cards.dart';
 import 'package:appattendance/features/attendance/presentation/screens/employee_individual_details_screen.dart';
-import 'package:appattendance/features/attendance/presentation/screens/project_detail_screen.dart';
+import 'package:appattendance/features/attendance/presentation/screens/project_analytics_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

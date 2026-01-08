@@ -109,8 +109,8 @@ class DBHelper {
     estd_end_date TEXT,         -- ← Added
     estd_effort TEXT,           -- ← Added
     estd_cost TEXT,             -- ← Added
-    project_status TEXT,
-    project_priority TEXT,
+    status TEXT DEFAULT 'active',
+    priority TEXT DEFAULT 'HIGH',
     progress REAL DEFAULT 0.0,
     created_at TEXT,
     updated_at TEXT,
@@ -315,7 +315,16 @@ class DBHelper {
             'ALTER TABLE employee_attendance ADD COLUMN photo_proof_path TEXT;',
           );
         }
+        await db.execute(
+          'ALTER TABLE employee_master ADD COLUMN emp_phone TEXT;',
+        );
       }
+      // if (oldVersion < 2) {
+      //   // Add new columns or tables for version 2
+      //   await db.execute(
+      //     'ALTER TABLE employee_master ADD COLUMN emp_phone TEXT;',
+      //   ); // Example upgrade
+      // }
 
       // Future upgrades (add more if blocks for higher versions)
       if (oldVersion < 3) {

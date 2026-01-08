@@ -36,160 +36,159 @@ class CheckInOutWidget extends ConsumerWidget {
         return geofences.any((geo) => geo.containsLocation(userLat, userLon));
       },
       loading: () => false,
-      error: (_, __) => false,
+      error: (_, _) => false,
     );
 
     return Card(
-      elevation: 2,
+      elevation: 500,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: isDark
-          ? Colors.grey[900]!.withOpacity(0.85)
-          : Colors.white.withOpacity(0.85),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: attendanceAsync.when(
-          data: (records) {
-            final today = DateTime.now();
-            final todayStr = DateFormat('yyyy-MM-dd').format(today);
+      color: Colors.transparent,
+      // color: isDark
+      //     ? Colors.grey[900]!.withOpacity(0.85)
+      //     : Colors.white.withOpacity(0.85),
+      child: attendanceAsync.when(
+        data: (records) {
+          final today = DateTime.now();
+          final todayStr = DateFormat('yyyy-MM-dd').format(today);
 
-            final todayRecords = records.where((r) {
-              final dateStr = r.attendanceDate?.toIso8601String().split('T')[0];
-              return dateStr == todayStr;
-            }).toList();
+          final todayRecords = records.where((r) {
+            final dateStr = r.attendanceDate?.toIso8601String().split('T')[0];
+            return dateStr == todayStr;
+          }).toList();
 
-            final hasCheckedIn = todayRecords.any((r) => r.isCheckIn);
-            final hasCheckedOut = todayRecords.any((r) => r.isCheckOut);
+          final hasCheckedIn = todayRecords.any((r) => r.isCheckIn);
+          final hasCheckedOut = todayRecords.any((r) => r.isCheckOut);
 
-            final checkInTime = hasCheckedIn
-                ? DateFormat('hh:mm a').format(
-                    todayRecords.firstWhere((r) => r.isCheckIn).timestamp!,
-                  )
-                : '--:--';
+          final checkInTime = hasCheckedIn
+              ? DateFormat(
+                  'hh:mm a',
+                ).format(todayRecords.firstWhere((r) => r.isCheckIn).timestamp!)
+              : '--:--';
 
-            final checkOutTime = hasCheckedOut
-                ? DateFormat('hh:mm a').format(
-                    todayRecords.firstWhere((r) => r.isCheckOut).timestamp!,
-                  )
-                : '--:--';
+          final checkOutTime = hasCheckedOut
+              ? DateFormat('hh:mm a').format(
+                  todayRecords.firstWhere((r) => r.isCheckOut).timestamp!,
+                )
+              : '--:--';
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Text(
-                //   isManagerial ? 'Team Check Status' : 'My Check Status',
-                //   style: TextStyle(
-                //     fontSize: 16,
-                //     fontWeight: FontWeight.w600,
-                //     color: isDark ? Colors.white70 : AppColors.primary,
-                //   ),
-                // ),
-                // const SizedBox(height: 12),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Text(
+              //   isManagerial ? 'Team Check Status' : 'My Check Status',
+              //   style: TextStyle(
+              //     fontSize: 16,
+              //     fontWeight: FontWeight.w600,
+              //     color: isDark ? Colors.white70 : AppColors.primary,
+              //   ),
+              // ),
+              // const SizedBox(height: 12),
+              if (!isInGeofence)
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.center,
+
                   children: [
-                    _StatusTile(
-                      label: 'Check-In',
-                      time: checkInTime,
-                      icon: Icons.login,
-                      color: hasCheckedIn ? Colors.green : Colors.grey,
-                    ),
-                    _StatusTile(
-                      label: 'Check-Out',
-                      time: checkOutTime,
-                      icon: Icons.logout,
-                      color: hasCheckedOut ? Colors.orange : Colors.grey,
-                    ),
-                  ],
-                ),
-
-                if (isManagerial) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    'Team Present Today: ${ref.watch(dashboardProvider).value?.presentToday ?? 0}/${ref.watch(dashboardProvider).value?.teamSize ?? 0}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: isDark ? Colors.white70 : Colors.black87,
-                    ),
-                  ),
-                ],
-
-                const SizedBox(height: 16),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _ActionButton(
-                      label: hasCheckedIn ? 'Checked In' : 'Check-In',
-                      icon: Icons.login,
-                      color: Colors.green,
-                      isEnabled: !hasCheckedIn && isInGeofence,
-                      onPressed: !hasCheckedIn && isInGeofence
-                          ? () async {
-                              await ref
-                                  .read(attendanceProvider.notifier)
-                                  .performCheckIn(
-                                    latitude:
-                                        19.0760, // TODO: Real from Geolocator
-                                    longitude: 72.8777,
-                                    verificationType: VerificationType.gps,
-                                    geofenceName: 'Office Zone',
-                                    projectId: 'P001',
-                                    notes: 'Office entry',
-                                  );
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Check-In Successful!'),
-                                ),
-                              );
-                            }
-                          : null,
-                    ),
-                    _ActionButton(
-                      label: 'Check-Out',
-                      icon: Icons.logout,
-                      color: Colors.orange,
-                      isEnabled: hasCheckedIn && !hasCheckedOut && isInGeofence,
-                      onPressed: hasCheckedIn && !hasCheckedOut && isInGeofence
-                          ? () async {
-                              await ref
-                                  .read(attendanceProvider.notifier)
-                                  .performCheckOut(
-                                    latitude: 19.0760,
-                                    longitude: 72.8777,
-                                    verificationType: VerificationType.gps,
-                                    geofenceName: 'Office Zone',
-                                    projectId: 'P001',
-                                    notes: 'Office exit',
-                                  );
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Check-Out Successful!'),
-                                ),
-                              );
-                            }
-                          : null,
-                    ),
-                  ],
-                ),
-
-                if (!isInGeofence)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: Text(
+                    Text(
                       'Outside office geofence - Check-in disabled',
                       style: TextStyle(color: Colors.red, fontSize: 12),
                       textAlign: TextAlign.center,
                     ),
+                  ],
+                ),
+              const SizedBox(height: 3),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _StatusTile(
+                    label: 'Check-In',
+                    time: checkInTime,
+                    // icon: Icons.login,
+                    color: hasCheckedIn ? Colors.green : Colors.grey,
                   ),
-              ],
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => Center(
-            child: Text('Error: $err', style: TextStyle(color: Colors.red)),
-          ),
+                  _StatusTile(
+                    label: 'Check-Out',
+                    time: checkOutTime,
+                    // icon: Icons.logout,
+                    color: hasCheckedOut ? Colors.orange : Colors.grey,
+                  ),
+                ],
+              ),
+
+              // if (isManagerial) ...[
+              // const SizedBox(height: 2),
+              // Text(
+              //   'Team Present Today: ${ref.watch(dashboardProvider).value?.presentToday ?? 0}/${ref.watch(dashboardProvider).value?.teamSize ?? 0}',
+              //   style: TextStyle(
+              //     fontSize: 13,
+              //     color: isDark ? Colors.white70 : Colors.black87,
+              //   ),
+              // ),
+              // ],
+              // const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _ActionButton(
+                    label: hasCheckedIn ? 'Checked In' : 'Check-In',
+                    icon: Icons.login,
+                    color: Colors.green,
+                    isEnabled: !hasCheckedIn && isInGeofence,
+                    onPressed: !hasCheckedIn && isInGeofence
+                        ? () async {
+                            await ref
+                                .read(attendanceProvider.notifier)
+                                .performCheckIn(
+                                  latitude:
+                                      19.0760, // TODO: Real from Geolocator
+                                  longitude: 72.8777,
+                                  verificationType: VerificationType.gps,
+                                  geofenceName: 'Office Zone',
+                                  projectId: 'P001',
+                                  notes: 'Office entry',
+                                );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Check-In Successful!'),
+                              ),
+                            );
+                          }
+                        : null,
+                  ),
+                  _ActionButton(
+                    label: 'Check-Out',
+                    icon: Icons.logout,
+                    color: Colors.orange,
+                    isEnabled: hasCheckedIn && !hasCheckedOut && isInGeofence,
+                    onPressed: hasCheckedIn && !hasCheckedOut && isInGeofence
+                        ? () async {
+                            await ref
+                                .read(attendanceProvider.notifier)
+                                .performCheckOut(
+                                  latitude: 19.0760,
+                                  longitude: 72.8777,
+                                  verificationType: VerificationType.gps,
+                                  geofenceName: 'Office Zone',
+                                  projectId: 'P001',
+                                  notes: 'Office exit',
+                                );
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Check-Out Successful!'),
+                              ),
+                            );
+                          }
+                        : null,
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(
+          child: Text('Error: $err', style: TextStyle(color: Colors.red)),
         ),
       ),
     );
@@ -200,13 +199,13 @@ class CheckInOutWidget extends ConsumerWidget {
 class _StatusTile extends StatelessWidget {
   final String label;
   final String time;
-  final IconData icon;
+  // final IconData icon;
   final Color color;
 
   const _StatusTile({
     required this.label,
     required this.time,
-    required this.icon,
+    // required this.icon,
     required this.color,
   });
 
@@ -214,9 +213,9 @@ class _StatusTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: color, size: 24),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        // Icon(icon, color: color, size: 24),
+        // const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.black)),
         Text(
           time,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -328,7 +327,7 @@ class _ActionButton extends StatelessWidget {
 //                       return checkInRecord.formattedTime;
 //                     },
 //                     loading: () => '--:--',
-//                     error: (_, __) => 'Error',
+//                     error: (_, _) => 'Error',
 //                   ),
 //                   icon: Icons.login,
 //                   color: Colors.green,
@@ -353,7 +352,7 @@ class _ActionButton extends StatelessWidget {
 //                       return checkOutRecord.formattedTime;
 //                     },
 //                     loading: () => '--:--',
-//                     error: (_, __) => 'Error',
+//                     error: (_, _) => 'Error',
 //                   ),
 //                   icon: Icons.logout,
 //                   color: Colors.orange,
@@ -373,7 +372,7 @@ class _ActionButton extends StatelessWidget {
 //                 //         )
 //                 //         .formattedTime,
 //                 //     loading: () => '--:--',
-//                 //     error: (_, __) => 'Error',
+//                 //     error: (_, _) => 'Error',
 //                 //   ),
 //                 //   icon: Icons.login,
 //                 //   color: Colors.green,
@@ -393,7 +392,7 @@ class _ActionButton extends StatelessWidget {
 //                 //         )
 //                 //         .formattedTime,
 //                 //     loading: () => '--:--',
-//                 //     error: (_, __) => 'Error',
+//                 //     error: (_, _) => 'Error',
 //                 //   ),
 //                 //   icon: Icons.logout,
 //                 //   color: Colors.orange,

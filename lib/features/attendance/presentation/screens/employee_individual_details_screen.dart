@@ -1,8 +1,3 @@
-// lib/features/attendance/presentation/screens/employee_individual_details_screen.dart
-// Individual Employee Details Screen (Manager View)
-// Shows name, photo, email, phone, daily status, overview (pie), current month history
-// Download selected period data as Excel
-
 import 'package:appattendance/core/utils/app_colors.dart';
 import 'package:appattendance/features/attendance/domain/models/analytics_model.dart';
 import 'package:appattendance/features/attendance/presentation/providers/analytics_provider.dart';

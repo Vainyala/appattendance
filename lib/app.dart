@@ -1,17 +1,19 @@
 // lib/app.dart
-// FINAL UPDATED VERSION - January 05, 2026
-// Features:
-// - First time: Splash → Device Verification → OTP → Password → MPIN → Login
-// - Subsequent times: Splash → Direct Login (device verified)
-// - Role-aware Dashboard
-// - Session timeout: 10 min inactivity + 1 min background
-// - Responsive + overflow-safe error screen
+// FINAL SIMPLIFIED & PROFESSIONAL VERSION - January 08, 2026
+// Clean, minimal app startup flow: Splash → Device Verification (first time) → OTP → Password → MPIN → Login
+// Subsequent logins: Splash → Direct Login (device verified)
+// Manager gets Select Role screen after login
+// Role-based Dashboard, session timeout (10 min inactivity + 1 min background)
+// Responsive, overflow-safe error screen, dark/light mode sync
+// No heavy logic in startup, fast & reliable
 
 import 'package:appattendance/core/providers/theme_notifier.dart';
+import 'package:appattendance/features/auth/domain/models/user_extension.dart';
 import 'package:appattendance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:appattendance/features/auth/presentation/screens/device_verification_screen.dart';
 import 'package:appattendance/features/auth/presentation/screens/login_screen.dart';
 import 'package:appattendance/features/auth/presentation/screens/otp_verification_screen.dart';
+import 'package:appattendance/features/auth/presentation/screens/select_role_screen.dart';
 import 'package:appattendance/features/auth/presentation/screens/set_mpin_screen.dart';
 import 'package:appattendance/features/auth/presentation/screens/set_password_screen.dart';
 import 'package:appattendance/features/dashboard/presentation/screens/dashboard_screen.dart';
@@ -27,7 +29,7 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Session timeout configuration
+    // Session timeout: 10 min inactivity + 1 min background
     final sessionConfig = SessionConfig(
       invalidateSessionForUserInactivity: const Duration(minutes: 10),
       invalidateSessionForAppLostFocus: const Duration(minutes: 1),
@@ -55,10 +57,7 @@ class App extends ConsumerWidget {
           '/set_mpin': (context) => SetMPINScreen(
             email: ModalRoute.of(context)!.settings.arguments as String,
           ),
-        },
-        onGenerateRoute: (settings) {
-          // Fallback for unknown routes
-          return MaterialPageRoute(builder: (context) => const SplashScreen());
+          '/select-role': (context) => const SelectRoleScreen(),
         },
         builder: (context, child) {
           return MediaQuery(
@@ -86,23 +85,25 @@ class _AppStartupWrapperState extends ConsumerState<AppStartupWrapper> {
   @override
   void initState() {
     super.initState();
-    _checkDeviceVerification();
+    _checkFirstTimeFlow();
   }
 
-  // Check if device is already verified (first time only)
-  Future<void> _checkDeviceVerification() async {
+  Future<void> _checkFirstTimeFlow() async {
     final prefs = await SharedPreferences.getInstance();
     final isDeviceVerified = prefs.getBool('is_device_verified') ?? false;
 
     if (!isDeviceVerified) {
-      // First time → Device Verification chain
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const DeviceVerificationScreen()),
-      );
+      // First time → Device Verification → OTP → Password → MPIN → Login
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const DeviceVerificationScreen()),
+        );
+      }
+    } else {
+      // Subsequent times → Direct to Login (device verified)
+      ref.invalidate(authProvider);
     }
-    ref.invalidate(authProvider);
-    // Else: Device already verified → direct to Login (handled by auth state)
   }
 
   @override
@@ -112,8 +113,16 @@ class _AppStartupWrapperState extends ConsumerState<AppStartupWrapper> {
     return authState.when(
       data: (user) {
         if (user != null) {
-          // Logged in → Dashboard (role-based content inside)
-          return const DashboardScreen();
+          // Logged in → Check if manager → Select Role, else direct Dashboard
+          if (user.isManagerial) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                Navigator.pushReplacementNamed(context, '/select-role');
+              }
+            });
+          } else {
+            return const DashboardScreen();
+          }
         }
         // Not logged in → Login
         return const LoginScreen();
@@ -129,30 +138,29 @@ class _AppStartupWrapperState extends ConsumerState<AppStartupWrapper> {
     StackTrace stack,
     WidgetRef ref,
   ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: isDark ? Colors.grey.shade900 : Colors.grey.shade50,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 32.0,
-              vertical: 24.0,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.error_outline_rounded,
                   size: 80,
-                  color: Theme.of(context).colorScheme.error,
+                  color: theme.colorScheme.error,
                 ),
                 const SizedBox(height: 24),
                 Text(
                   'App Initialization Failed',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.error,
+                    color: theme.colorScheme.error,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -160,24 +168,23 @@ class _AppStartupWrapperState extends ConsumerState<AppStartupWrapper> {
                 Text(
                   'Please check your connection or restart the app.',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
+                  style: theme.textTheme.bodyLarge,
                 ),
-                const SizedBox(height: 8),
-                if (kDebugMode)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      'Error: $error\nStack: $stack',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                      textAlign: TextAlign.center,
-                    ),
+                if (kDebugMode) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error: $error',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    textAlign: TextAlign.center,
                   ),
+                ],
                 const SizedBox(height: 32),
                 FilledButton.icon(
                   icon: const Icon(Icons.refresh),
                   label: const Text('Retry'),
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(200, 54),
+                    backgroundColor: theme.colorScheme.primary,
                   ),
                   onPressed: () {
                     ref.invalidate(authProvider);
@@ -198,6 +205,207 @@ class _AppStartupWrapperState extends ConsumerState<AppStartupWrapper> {
     );
   }
 }
+
+// // lib/app.dart
+// // FINAL UPDATED VERSION - January 05, 2026
+// // Features:
+// // - First time: Splash → Device Verification → OTP → Password → MPIN → Login
+// // - Subsequent times: Splash → Direct Login (device verified)
+// // - Role-aware Dashboard
+// // - Session timeout: 10 min inactivity + 1 min background
+// // - Responsive + overflow-safe error screen
+
+// import 'package:appattendance/core/providers/theme_notifier.dart';
+// import 'package:appattendance/features/auth/presentation/providers/auth_provider.dart';
+// import 'package:appattendance/features/auth/presentation/screens/device_verification_screen.dart';
+// import 'package:appattendance/features/auth/presentation/screens/login_screen.dart';
+// import 'package:appattendance/features/auth/presentation/screens/otp_verification_screen.dart';
+// import 'package:appattendance/features/auth/presentation/screens/set_mpin_screen.dart';
+// import 'package:appattendance/features/auth/presentation/screens/set_password_screen.dart';
+// import 'package:appattendance/features/dashboard/presentation/screens/dashboard_screen.dart';
+// import 'package:appattendance/features/dashboard/presentation/screens/splash_screen.dart';
+// import 'package:flutter/foundation.dart';
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:local_session_timeout/local_session_timeout.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
+
+// class App extends ConsumerWidget {
+//   const App({super.key});
+
+//   @override
+//   Widget build(BuildContext context, WidgetRef ref) {
+//     // Session timeout configuration
+//     final sessionConfig = SessionConfig(
+//       invalidateSessionForUserInactivity: const Duration(minutes: 10),
+//       invalidateSessionForAppLostFocus: const Duration(minutes: 1),
+//     );
+
+//     return SessionTimeoutManager(
+//       sessionConfig: sessionConfig,
+//       child: MaterialApp(
+//         title: 'Nutantek Attendance',
+//         debugShowCheckedModeBanner: false,
+//         theme: ThemeData.light(),
+//         darkTheme: ThemeData.dark(),
+//         themeMode: ref.watch(themeProvider),
+//         home: const AppStartupWrapper(),
+//         routes: {
+//           '/login': (context) => const LoginScreen(),
+//           '/dashboard': (context) => const DashboardScreen(),
+//           '/device_verification': (context) => const DeviceVerificationScreen(),
+//           '/otp_verification': (context) => OtpVerificationScreen(
+//             email: ModalRoute.of(context)!.settings.arguments as String,
+//           ),
+//           '/set_password': (context) => SetPasswordScreen(
+//             email: ModalRoute.of(context)!.settings.arguments as String,
+//           ),
+//           '/set_mpin': (context) => SetMPINScreen(
+//             email: ModalRoute.of(context)!.settings.arguments as String,
+//           ),
+//         },
+//         onGenerateRoute: (settings) {
+//           // Fallback for unknown routes
+//           return MaterialPageRoute(builder: (context) => const SplashScreen());
+//         },
+//         builder: (context, child) {
+//           return MediaQuery(
+//             data: MediaQuery.of(context).copyWith(
+//               textScaleFactor: MediaQuery.of(
+//                 context,
+//               ).textScaleFactor.clamp(0.85, 1.15),
+//             ),
+//             child: child!,
+//           );
+//         },
+//       ),
+//     );
+//   }
+// }
+
+// class AppStartupWrapper extends ConsumerStatefulWidget {
+//   const AppStartupWrapper({super.key});
+
+//   @override
+//   ConsumerState<AppStartupWrapper> createState() => _AppStartupWrapperState();
+// }
+
+// class _AppStartupWrapperState extends ConsumerState<AppStartupWrapper> {
+//   @override
+//   void initState() {
+//     super.initState();
+//     _checkDeviceVerification();
+//   }
+
+//   // Check if device is already verified (first time only)
+//   Future<void> _checkDeviceVerification() async {
+//     final prefs = await SharedPreferences.getInstance();
+//     final isDeviceVerified = prefs.getBool('is_device_verified') ?? false;
+
+//     if (!isDeviceVerified) {
+//       // First time → Device Verification chain
+//       Navigator.pushReplacement(
+//         context,
+//         MaterialPageRoute(builder: (_) => const DeviceVerificationScreen()),
+//       );
+//     }
+//     ref.invalidate(authProvider);
+//     // Else: Device already verified → direct to Login (handled by auth state)
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final authState = ref.watch(authProvider);
+
+//     return authState.when(
+//       data: (user) {
+//         if (user != null) {
+//           // Logged in → Dashboard (role-based content inside)
+//           return const DashboardScreen();
+//         }
+//         // Not logged in → Login
+//         return const LoginScreen();
+//       },
+//       loading: () => const SplashScreen(),
+//       error: (error, stack) => _buildErrorScreen(context, error, stack, ref),
+//     );
+//   }
+
+//   Widget _buildErrorScreen(
+//     BuildContext context,
+//     Object error,
+//     StackTrace stack,
+//     WidgetRef ref,
+//   ) {
+//     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+//     return Scaffold(
+//       body: SafeArea(
+//         child: Center(
+//           child: SingleChildScrollView(
+//             padding: const EdgeInsets.symmetric(
+//               horizontal: 32.0,
+//               vertical: 24.0,
+//             ),
+//             child: Column(
+//               mainAxisAlignment: MainAxisAlignment.center,
+//               children: [
+//                 Icon(
+//                   Icons.error_outline_rounded,
+//                   size: 80,
+//                   color: Theme.of(context).colorScheme.error,
+//                 ),
+//                 const SizedBox(height: 24),
+//                 Text(
+//                   'App Initialization Failed',
+//                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+//                     fontWeight: FontWeight.bold,
+//                     color: Theme.of(context).colorScheme.error,
+//                   ),
+//                   textAlign: TextAlign.center,
+//                 ),
+//                 const SizedBox(height: 12),
+//                 Text(
+//                   'Please check your connection or restart the app.',
+//                   textAlign: TextAlign.center,
+//                   style: Theme.of(context).textTheme.bodyLarge,
+//                 ),
+//                 const SizedBox(height: 8),
+//                 if (kDebugMode)
+//                   Padding(
+//                     padding: const EdgeInsets.symmetric(vertical: 8.0),
+//                     child: Text(
+//                       'Error: $error\nStack: $stack',
+//                       style: const TextStyle(fontSize: 12, color: Colors.grey),
+//                       textAlign: TextAlign.center,
+//                     ),
+//                   ),
+//                 const SizedBox(height: 32),
+//                 FilledButton.icon(
+//                   icon: const Icon(Icons.refresh),
+//                   label: const Text('Retry'),
+//                   style: FilledButton.styleFrom(
+//                     minimumSize: const Size(200, 54),
+//                   ),
+//                   onPressed: () {
+//                     ref.invalidate(authProvider);
+//                   },
+//                 ),
+//                 const SizedBox(height: 16),
+//                 TextButton(
+//                   onPressed: () {
+//                     Navigator.pushReplacementNamed(context, '/login');
+//                   },
+//                   child: const Text('Go to Login'),
+//                 ),
+//               ],
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 // // lib/app.dart
 // import 'package:appattendance/core/providers/theme_notifier.dart';

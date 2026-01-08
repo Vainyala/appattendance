@@ -1,9 +1,3 @@
-// lib/features/attendance/data/repositories/attendance_analytics_repository_impl.dart
-// CURRENT: Local SQLite Implementation (dummy_data.json + db_helper.dart)
-// Uses attendance_analytics table for daily stats
-// Role-based: Employee → own, Manager → team aggregate
-// Future: Replace with API impl (Dio)
-
 import 'package:appattendance/core/database/db_helper.dart';
 import 'package:appattendance/features/attendance/data/repositories/analytics_repository.dart';
 import 'package:appattendance/features/attendance/domain/models/analytics_model.dart';
@@ -57,11 +51,11 @@ class AttendanceAnalyticsRepositoryImpl
     );
 
     // Fetch active projects (for manager)
-    final activeProjectsRows = await db.query(
-      'project_master',
-      where: 'mng_emp_id = ? AND status = ?',
-      whereArgs: [empId, 'active'],
-    );
+    // final activeProjectsRows = await db.query(
+    //   'project_master',
+    //   where: 'mng_emp_id = ? AND status = ?',
+    //   whereArgs: [empId, 'active'],
+    // );
 
     // Pending counts (real DB)
     final pendingLeaves = await dbHelper.getPendingLeavesCount(empId);
@@ -152,20 +146,20 @@ class AttendanceAnalyticsRepositoryImpl
     }).toList();
 
     // Active projects (real data)
-    List<ProjectAnalytics> activeProjects = activeProjectsRows.map((proj) {
-      return ProjectAnalytics(
-        projectId: proj['project_id'] as String,
-        name: proj['project_name'] as String,
-        description: proj['project_description'] as String? ?? '',
-        status: proj['status'] as String? ?? 'ACTIVE',
-        priority: proj['priority'] as String? ?? 'HIGH',
-        progress: (proj['progress'] as num?)?.toDouble() ?? 0.0,
-        teamSize: (proj['team_size'] as int?) ?? 0,
-        totalTasks: (proj['total_tasks'] as int?) ?? 0,
-        daysLeft: (proj['days_left'] as int?) ?? 0,
-        teamMembers: [], // TODO: Real from join
-      );
-    }).toList();
+    // List<ProjectAnalytics> activeProjects = activeProjectsRows.map((proj) {
+    //   return ProjectAnalytics(
+    //     projectId: proj['project_id'] as String,
+    //     name: proj['project_name'] as String,
+    //     description: proj['project_description'] as String? ?? '',
+    //     status: proj['status'] as String? ?? 'ACTIVE',
+    //     priority: proj['priority'] as String? ?? 'HIGH',
+    //     progress: (proj['progress'] as num?)?.toDouble() ?? 0.0,
+    //     teamSize: (proj['team_size'] as int?) ?? 0,
+    //     totalTasks: (proj['total_tasks'] as int?) ?? 0,
+    //     daysLeft: (proj['days_left'] as int?) ?? 0,
+    //     teamMembers: [], // TODO: Real from join
+    //   );
+    // }).toList();
 
     return AnalyticsModel(
       period: period,
@@ -177,7 +171,7 @@ class AttendanceAnalyticsRepositoryImpl
       graphDataRaw: graphDataRaw,
       graphLabels: graphLabels,
       insights: insights,
-      activeProjects: activeProjects,
+      // activeProjects: activeProjects,
       totalDays: end.difference(start).inDays + 1,
       presentDays: teamStats['present']!,
       absentDays: teamStats['absent']!,

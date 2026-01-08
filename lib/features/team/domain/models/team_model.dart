@@ -18,8 +18,8 @@ class TeamMemberAnalytics with _$TeamMemberAnalytics {
   const factory TeamMemberAnalytics({
     required String empId, // emp_id (PK)
     required String name,
-    required String designation,
-    required String email,
+    String? designation,
+    String? email,
     String? phone,
     @Default(UserStatus.active) UserStatus status, // From user_model enum
     String? profilePhoto, // Profile photo or generated

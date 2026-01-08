@@ -27,12 +27,15 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
 
   /// App start pe check karta hai ki user already logged in hai ya nahi
   Future<void> _checkCurrentUser() async {
-    if (!mounted) return;
+    if (!mounted) return; // ← Yeh already hai, good
+
     state = const AsyncLoading();
     try {
       final user = await repository.getCurrentUser();
+      if (!mounted) return; // ← Extra safety: async ke baad bhi check
       state = AsyncData(user);
     } catch (e, stack) {
+      if (!mounted) return;
       state = AsyncError(e, stack);
     }
   }
@@ -44,13 +47,25 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
 
     try {
       final user = await repository.login(email.trim(), password);
+      if (!mounted) return;
       state = AsyncData(user);
-
-      // Start 20-minute auto-logout timer after successful login
       _startLogoutTimer();
     } catch (e, stack) {
+      if (!mounted) return;
       state = AsyncError(e, stack);
     }
+  }
+
+  Future<void> logout() async {
+    if (!mounted) return;
+    _logoutTimer?.cancel();
+    await repository.logout();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('saved_email');
+    await prefs.remove('bound_device_id');
+    await prefs.remove('is_device_verified');
+    if (!mounted) return;
+    state = const AsyncData(null);
   }
 
   void _startLogoutTimer() {
@@ -60,16 +75,6 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
         logout();
       }
     });
-  }
-
-  Future<void> logout() async {
-    _logoutTimer?.cancel();
-    await repository.logout();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('saved_email'); // Remember me clear
-    await prefs.remove('bound_device_id'); // Device binding clear
-    await prefs.remove('is_device_verified'); // Optional: First time reset
-    state = const AsyncData(null);
   }
 
   void updateUser(UserModel updated) {

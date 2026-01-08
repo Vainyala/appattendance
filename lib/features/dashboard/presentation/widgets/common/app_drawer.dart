@@ -365,7 +365,20 @@ class AppDrawer extends ConsumerWidget {
                             color: Colors.transparent,
                             child: InkWell(
                               onTap: () async {
+                                // 1. Logout from auth notifier
                                 await ref.read(authProvider.notifier).logout();
+
+                                // 2. Clear view mode (optional)
+                                ref.read(viewModeProvider.notifier).state =
+                                    ViewMode.employee;
+
+                                // 3. Invalidate all providers to force fresh state
+                                ref.invalidate(authProvider);
+                                ref.invalidate(dashboardProvider);
+                                ref.invalidate(viewModeProvider);
+                                // Add more providers if needed (e.g., projectProvider, etc.)
+
+                                // 4. Navigate to login and remove all previous routes
                                 if (context.mounted) {
                                   Navigator.pushNamedAndRemoveUntil(
                                     context,

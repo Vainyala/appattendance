@@ -9,7 +9,7 @@
 
 import 'package:appattendance/core/theme/app_gradients.dart';
 import 'package:appattendance/core/utils/app_colors.dart';
-import 'package:appattendance/features/leaves/presentation/widgets/common/month_filter_widget.dart';
+import 'package:appattendance/features/regularisation/presentation/widgets/common/month_filter_widget.dart';
 import 'package:appattendance/features/regularisation/presentation/providers/regularisation_filter_provider.dart';
 import 'package:appattendance/features/regularisation/presentation/providers/regularisation_notifier.dart';
 import 'package:appattendance/features/regularisation/presentation/providers/regularisation_provider.dart';
@@ -132,13 +132,13 @@ class _EmployeeRegularisationScreenState
                   children: [
                     // Month Filter
                     MonthFilterWidget(
-                      initialMonth: _selectedMonth,
+                      selectedMonth: _selectedMonth,
                       onMonthChanged: (newMonth) {
                         setState(() => _selectedMonth = newMonth);
                       },
                     ),
 
-                    const SizedBox(height: 24),
+                    // const SizedBox(height: 24),
 
                     // Monthly Overview
                     MonthlyOverviewWidget(

@@ -1,6 +1,6 @@
 // lib/features/dashboard/presentation/widgets/employeewidgets/attendance_calendar_widget.dart
 // Upgraded: Uses AttendanceModel (freezed) + role-based
-// Real data from DashboardNotifier + loading/error + dark mode
+// Real data from DashboardNotifier + loading/error
 // Current date: December 29, 2025
 
 import 'package:appattendance/core/utils/app_colors.dart';

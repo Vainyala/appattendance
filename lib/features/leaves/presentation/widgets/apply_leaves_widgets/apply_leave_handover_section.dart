@@ -1,4 +1,10 @@
 // lib/features/leaves/presentation/widgets/apply_leave_handover_section.dart
+// FINAL SIMPLIFIED & PROFESSIONAL VERSION - January 08, 2026
+// Ultra-clean, minimal, premium look: subtle borders, compact fields
+// Responsive, dark/light mode sync, focused optional section
+// No visual noise, fast & intuitive
+
+import 'package:appattendance/core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class ApplyLeaveHandoverSection extends StatelessWidget {
@@ -15,38 +21,78 @@ class ApplyLeaveHandoverSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Handover Person (Optional)',
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.onSurface,
+          ),
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: nameController,
-          decoration: const InputDecoration(
-            labelText: 'Name',
-            border: OutlineInputBorder(),
-          ),
-        ),
+
+        _buildField(context, controller: nameController, label: 'Name'),
         const SizedBox(height: 12),
-        TextFormField(
+
+        _buildField(
+          context,
           controller: emailController,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            border: OutlineInputBorder(),
-          ),
+          label: 'Email',
+          keyboardType: TextInputType.emailAddress,
         ),
         const SizedBox(height: 12),
-        TextFormField(
+
+        _buildField(
+          context,
           controller: phoneController,
-          decoration: const InputDecoration(
-            labelText: 'Phone',
-            border: OutlineInputBorder(),
-          ),
+          label: 'Phone',
+          keyboardType: TextInputType.phone,
         ),
       ],
+    );
+  }
+
+  Widget _buildField(
+    BuildContext context, {
+    required TextEditingController controller,
+    required String label,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: theme.dividerColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: theme.dividerColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.primary, width: 2),
+        ),
+        filled: true,
+        fillColor: isDark ? Colors.grey.shade700 : Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+      ),
+      style: TextStyle(color: theme.colorScheme.onSurface),
     );
   }
 }

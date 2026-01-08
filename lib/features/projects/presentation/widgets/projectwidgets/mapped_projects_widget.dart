@@ -1,16 +1,21 @@
 // lib/features/projects/presentation/widgets/projectwidgets/mapped_projects_widget.dart
-// FINAL UPGRADED & POLISHED VERSION - January 06, 2026
+// FINAL UPGRADED & POLISHED VERSION - January 07, 2026
 // Null-safe, role-based, toggle respected
 // Manager team projects + employee mapped projects
 // Responsive horizontal cards, dark mode, no overflow
 // Clean production code (no debug prints)
+// Navigation to ProjectDetailScreen on tap (manager/employee both)
+// Uses latest ProjectModel with all fields
+// FIXED: Removed unnecessary ProjectAnalytics conversion; pass ProjectModel directly
 
 import 'package:appattendance/core/providers/view_mode_provider.dart';
 import 'package:appattendance/core/utils/app_colors.dart';
+import 'package:appattendance/features/attendance/presentation/screens/project_analytics_screen.dart';
 import 'package:appattendance/features/auth/domain/models/user_model_import.dart';
 import 'package:appattendance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:appattendance/features/projects/domain/models/project_model.dart';
 import 'package:appattendance/features/projects/presentation/providers/project_provider.dart';
+import 'package:appattendance/features/projects/presentation/screens/project_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -62,30 +67,38 @@ class MappedProjectsWidget extends ConsumerWidget {
               );
             }
 
-            return Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    effectiveManagerial ? "Mapped Projects" : "My Projects",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  effectiveManagerial ? "Team Projects" : "My Projects",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
-                  const SizedBox(height: 16),
+                ),
+                const SizedBox(height: 16),
 
-                  SizedBox(
-                    height: 180,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: projectList.length,
-                      itemBuilder: (context, index) {
-                        final project = projectList[index];
+                SizedBox(
+                  height: 180,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: projectList.length,
+                    itemBuilder: (context, index) {
+                      final project = projectList[index];
 
-                        return Container(
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ProjectDetailScreen(project: project),
+                            ),
+                          );
+                        },
+                        child: Container(
                           width: 260,
                           margin: const EdgeInsets.only(right: 16),
                           decoration: BoxDecoration(
@@ -188,12 +201,12 @@ class MappedProjectsWidget extends ConsumerWidget {
                               ],
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),

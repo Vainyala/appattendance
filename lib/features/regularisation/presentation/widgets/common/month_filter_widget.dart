@@ -1,9 +1,9 @@
 // lib/features/regularisation/presentation/widgets/month_filter_widget.dart
-// FINAL UPGRADED & LIVE VERSION - January 06, 2026
-// UI/UX exactly same rakha (no visual change)
-// Only shows live current month + previous month (real DateTime.now())
-// No year selector, no dropdown, no dummy list
-// Null-safe, responsive (horizontal scroll), dark mode support
+// FINAL SIMPLIFIED & PROFESSIONAL VERSION - January 08, 2026
+// Ultra-clean, minimal look: subtle chips, tight spacing
+// Only current month + previous month (real-time, no year selector)
+// Responsive horizontal scroll, dark/light mode sync, no overflow
+// Smooth selection, fast & intuitive
 
 import 'package:appattendance/core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -21,61 +21,49 @@ class MonthFilterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    // Live: only previous + current month (real-time)
+    // Live: only previous + current month
     final months = _getLiveMonths();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
           children: months.map((month) {
             final isSelected = month == selectedMonth;
             return Padding(
-              padding: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.only(right: 8),
               child: GestureDetector(
                 onTap: () => onMonthChanged(month),
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
+                  duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
+                    horizontal: 16,
+                    vertical: 8,
                   ),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Colors.blue
-                        : Colors.grey.withOpacity(0.2),
+                        ? AppColors.primary
+                        : (isDark
+                              ? Colors.grey.shade800
+                              : Colors.grey.shade100),
                     borderRadius: BorderRadius.circular(30),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: Colors.blue.withOpacity(0.4),
-                              blurRadius: 8,
-                            ),
-                          ]
-                        : null,
+                    border: isSelected
+                        ? null
+                        : Border.all(color: theme.dividerColor),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (isSelected)
-                        const Icon(
-                          Icons.check_circle,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                      SizedBox(width: isSelected ? 8 : 0),
-                      Text(
-                        month,
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black87,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
+                  child: Text(
+                    month,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected
+                          ? Colors.white
+                          : theme.colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ),
@@ -86,174 +74,12 @@ class MonthFilterWidget extends StatelessWidget {
     );
   }
 
-  // Live: only previous + current month (real-time, no dummy)
   List<String> _getLiveMonths() {
     final now = DateTime.now();
-    final current = DateFormat('MMM yyyy').format(now);
-    final previousMonth = DateTime(now.year, now.month - 1, 1);
-    final previous = DateFormat('MMM yyyy').format(previousMonth);
+    final current = DateFormat('MMMM yyyy').format(now);
+    final previous = DateFormat(
+      'MMMM yyyy',
+    ).format(DateTime(now.year, now.month - 1, 1));
     return [previous, current];
   }
 }
-
-// // lib/features/regularisation/presentation/widgets/month_filter_widget.dart
-
-// import 'package:flutter/material.dart';
-// import 'package:intl/intl.dart';
-
-// class MonthFilterWidget extends StatelessWidget {
-//   final String selectedMonthYear;
-//   final ValueChanged<String> onMonthSelected;
-//   final List<String>
-//   availableMonths; // Dynamic list (API se aayega future mein)
-
-//   const MonthFilterWidget({
-//     super.key,
-//     required this.selectedMonthYear,
-//     required this.onMonthSelected,
-//     this.availableMonths = const [], // Default empty, future mein API se fill
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     // Agar availableMonths empty hai toh default previous + current month use karo (fallback)
-//     final months = availableMonths.isEmpty
-//         ? _getDefaultMonths()
-//         : availableMonths;
-
-//     return Padding(
-//       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-//       child: SingleChildScrollView(
-//         scrollDirection: Axis.horizontal,
-//         child: Row(
-//           children: months.map((month) {
-//             final isSelected = month == selectedMonthYear;
-//             return Padding(
-//               padding: EdgeInsets.only(right: 12),
-//               child: GestureDetector(
-//                 onTap: () => onMonthSelected(month),
-//                 child: AnimatedContainer(
-//                   duration: Duration(milliseconds: 300),
-//                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-//                   decoration: BoxDecoration(
-//                     color: isSelected
-//                         ? Colors.blue
-//                         : Colors.grey.withOpacity(0.2),
-//                     borderRadius: BorderRadius.circular(30),
-//                     boxShadow: isSelected
-//                         ? [
-//                             BoxShadow(
-//                               color: Colors.blue.withOpacity(0.4),
-//                               blurRadius: 8,
-//                             ),
-//                           ]
-//                         : null,
-//                   ),
-//                   child: Row(
-//                     mainAxisSize: MainAxisSize.min,
-//                     children: [
-//                       if (isSelected)
-//                         Icon(Icons.check_circle, color: Colors.white, size: 18),
-//                       SizedBox(width: isSelected ? 8 : 0),
-//                       Text(
-//                         month,
-//                         style: TextStyle(
-//                           color: isSelected ? Colors.white : Colors.black87,
-//                           fontWeight: FontWeight.w600,
-//                           fontSize: 16,
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//             );
-//           }).toList(),
-//         ),
-//       ),
-//     );
-//   }
-
-//   // Fallback: previous + current month (API nahi aaya toh yeh use hoga)
-//   List<String> _getDefaultMonths() {
-//     final now = DateTime.now();
-//     final current = DateFormat('MMM yyyy').format(now);
-//     final previous = DateFormat(
-//       'MMM yyyy',
-//     ).format(DateTime(now.year, now.month - 1, 1));
-//     return [previous, current];
-//   }
-// }
-
-// // lib/features/regularisation/presentation/widgets/month_filter_widget.dart
-
-// import 'package:flutter/material.dart';
-// import 'package:intl/intl.dart';
-
-// class MonthFilterWidget extends StatelessWidget {
-//   final String selectedMonth;
-//   final ValueChanged<String> onMonthChanged;
-
-//   const MonthFilterWidget({
-//     super.key,
-//     required this.selectedMonth,
-//     required this.onMonthChanged,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     // Dynamic previous + current month (no hardcode)
-//     final currentDate = DateTime.now();
-//     final currentMonth = DateFormat('MMM yyyy').format(currentDate);
-//     final previousMonth = DateFormat(
-//       'MMM yyyy',
-//     ).format(DateTime(currentDate.year, currentDate.month - 1, 1));
-
-//     final months = [previousMonth, currentMonth];
-
-//     return Padding(
-//       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-//       child: Row(
-//         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//         children: months.map((month) {
-//           final isSelected = month == selectedMonth;
-//           return GestureDetector(
-//             onTap: () => onMonthChanged(month),
-//             child: AnimatedContainer(
-//               duration: Duration(milliseconds: 300),
-//               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-//               decoration: BoxDecoration(
-//                 color: isSelected ? Colors.blue : Colors.grey.withOpacity(0.2),
-//                 borderRadius: BorderRadius.circular(30),
-//                 boxShadow: isSelected
-//                     ? [
-//                         BoxShadow(
-//                           color: Colors.blue.withOpacity(0.4),
-//                           blurRadius: 8,
-//                         ),
-//                       ]
-//                     : null,
-//               ),
-//               child: Row(
-//                 mainAxisSize: MainAxisSize.min,
-//                 children: [
-//                   if (isSelected)
-//                     Icon(Icons.check_circle, color: Colors.white, size: 18),
-//                   SizedBox(width: isSelected ? 8 : 0),
-//                   Text(
-//                     month,
-//                     style: TextStyle(
-//                       color: isSelected ? Colors.white : Colors.black87,
-//                       fontWeight: FontWeight.w600,
-//                       fontSize: 16,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           );
-//         }).toList(),
-//       ),
-//     );
-//   }
-// }

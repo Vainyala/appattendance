@@ -1,4 +1,3 @@
-// lib/core/services/offline_attendance_service.dart
 import 'dart:convert';
 import 'package:appattendance/features/attendance/domain/models/attendance_model.dart';
 import 'package:appattendance/features/attendance/presentation/providers/attendance_provider.dart';

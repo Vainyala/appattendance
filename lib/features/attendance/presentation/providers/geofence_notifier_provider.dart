@@ -1,4 +1,3 @@
-// lib/features/geofence/presentation/providers/geofence_provider.dart
 import 'package:appattendance/features/attendance/data/repositories/geofence_repository.dart';
 import 'package:appattendance/features/attendance/data/repositories/geofence_repository_impl.dart';
 import 'package:appattendance/features/attendance/domain/models/geofence_model.dart';

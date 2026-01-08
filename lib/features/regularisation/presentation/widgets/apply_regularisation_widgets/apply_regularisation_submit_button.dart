@@ -7,11 +7,11 @@
 import 'package:appattendance/core/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 
-class ApplyLeaveSubmitButton extends StatelessWidget {
+class ApplyRegularisationSubmitButton extends StatelessWidget {
   final bool isSubmitting;
   final VoidCallback onPressed;
 
-  const ApplyLeaveSubmitButton({
+  const ApplyRegularisationSubmitButton({
     super.key,
     required this.isSubmitting,
     required this.onPressed,
@@ -47,7 +47,7 @@ class ApplyLeaveSubmitButton extends StatelessWidget {
                 ),
               )
             : Text(
-                'Submit Leave Request',
+                'Submit Regularization Request',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,

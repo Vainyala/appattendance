@@ -46,6 +46,13 @@ _$ProjectModelImpl _$$ProjectModelImplFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const [],
+      teamMembers:
+          (json['teamMembers'] as List<dynamic>?)
+              ?.map(
+                (e) => TeamMemberAnalytics.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          const [],
       startDate: json['startDate'] == null
           ? null
           : DateTime.parse(json['startDate'] as String),
@@ -88,6 +95,7 @@ Map<String, dynamic> _$$ProjectModelImplToJson(_$ProjectModelImpl instance) =>
       'daysLeft': instance.daysLeft,
       'teamMemberIds': instance.teamMemberIds,
       'teamMemberNames': instance.teamMemberNames,
+      'teamMembers': instance.teamMembers,
       'startDate': instance.startDate?.toIso8601String(),
       'endDate': instance.endDate?.toIso8601String(),
       'createdAt': instance.createdAt?.toIso8601String(),

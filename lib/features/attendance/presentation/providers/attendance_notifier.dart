@@ -1,9 +1,3 @@
-// lib/features/attendance/presentation/providers/attendance_notifier.dart
-// FINAL Production-Ready Version (01 Jan 2026)
-// Enhanced: Offline sync support, auto-load on init, period-based data
-// Integrates with OfflineAttendanceService, db_helper, and analytics
-// Future-proof for API switch (keep notifier same, change repo)
-
 import 'package:appattendance/core/database/database_provider.dart';
 import 'package:appattendance/core/database/db_helper.dart';
 import 'package:appattendance/features/attendance/data/repositories/attendance_repository_impl.dart';

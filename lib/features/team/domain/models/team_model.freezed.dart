@@ -23,8 +23,8 @@ TeamMemberAnalytics _$TeamMemberAnalyticsFromJson(Map<String, dynamic> json) {
 mixin _$TeamMemberAnalytics {
   String get empId => throw _privateConstructorUsedError; // emp_id (PK)
   String get name => throw _privateConstructorUsedError;
-  String get designation => throw _privateConstructorUsedError;
-  String get email => throw _privateConstructorUsedError;
+  String? get designation => throw _privateConstructorUsedError;
+  String? get email => throw _privateConstructorUsedError;
   String? get phone => throw _privateConstructorUsedError;
   UserStatus get status =>
       throw _privateConstructorUsedError; // From user_model enum
@@ -58,8 +58,8 @@ abstract class $TeamMemberAnalyticsCopyWith<$Res> {
   $Res call({
     String empId,
     String name,
-    String designation,
-    String email,
+    String? designation,
+    String? email,
     String? phone,
     UserStatus status,
     String? profilePhoto,
@@ -88,8 +88,8 @@ class _$TeamMemberAnalyticsCopyWithImpl<$Res, $Val extends TeamMemberAnalytics>
   $Res call({
     Object? empId = null,
     Object? name = null,
-    Object? designation = null,
-    Object? email = null,
+    Object? designation = freezed,
+    Object? email = freezed,
     Object? phone = freezed,
     Object? status = null,
     Object? profilePhoto = freezed,
@@ -108,14 +108,14 @@ class _$TeamMemberAnalyticsCopyWithImpl<$Res, $Val extends TeamMemberAnalytics>
                 ? _value.name
                 : name // ignore: cast_nullable_to_non_nullable
                       as String,
-            designation: null == designation
+            designation: freezed == designation
                 ? _value.designation
                 : designation // ignore: cast_nullable_to_non_nullable
-                      as String,
-            email: null == email
+                      as String?,
+            email: freezed == email
                 ? _value.email
                 : email // ignore: cast_nullable_to_non_nullable
-                      as String,
+                      as String?,
             phone: freezed == phone
                 ? _value.phone
                 : phone // ignore: cast_nullable_to_non_nullable
@@ -162,8 +162,8 @@ abstract class _$$TeamMemberAnalyticsImplCopyWith<$Res>
   $Res call({
     String empId,
     String name,
-    String designation,
-    String email,
+    String? designation,
+    String? email,
     String? phone,
     UserStatus status,
     String? profilePhoto,
@@ -191,8 +191,8 @@ class __$$TeamMemberAnalyticsImplCopyWithImpl<$Res>
   $Res call({
     Object? empId = null,
     Object? name = null,
-    Object? designation = null,
-    Object? email = null,
+    Object? designation = freezed,
+    Object? email = freezed,
     Object? phone = freezed,
     Object? status = null,
     Object? profilePhoto = freezed,
@@ -211,14 +211,14 @@ class __$$TeamMemberAnalyticsImplCopyWithImpl<$Res>
             ? _value.name
             : name // ignore: cast_nullable_to_non_nullable
                   as String,
-        designation: null == designation
+        designation: freezed == designation
             ? _value.designation
             : designation // ignore: cast_nullable_to_non_nullable
-                  as String,
-        email: null == email
+                  as String?,
+        email: freezed == email
             ? _value.email
             : email // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as String?,
         phone: freezed == phone
             ? _value.phone
             : phone // ignore: cast_nullable_to_non_nullable
@@ -258,8 +258,8 @@ class _$TeamMemberAnalyticsImpl extends _TeamMemberAnalytics {
   const _$TeamMemberAnalyticsImpl({
     required this.empId,
     required this.name,
-    required this.designation,
-    required this.email,
+    this.designation,
+    this.email,
     this.phone,
     this.status = UserStatus.active,
     this.profilePhoto,
@@ -281,9 +281,9 @@ class _$TeamMemberAnalyticsImpl extends _TeamMemberAnalytics {
   @override
   final String name;
   @override
-  final String designation;
+  final String? designation;
   @override
-  final String email;
+  final String? email;
   @override
   final String? phone;
   @override
@@ -390,8 +390,8 @@ abstract class _TeamMemberAnalytics extends TeamMemberAnalytics {
   const factory _TeamMemberAnalytics({
     required final String empId,
     required final String name,
-    required final String designation,
-    required final String email,
+    final String? designation,
+    final String? email,
     final String? phone,
     final UserStatus status,
     final String? profilePhoto,
@@ -411,9 +411,9 @@ abstract class _TeamMemberAnalytics extends TeamMemberAnalytics {
   @override
   String get name;
   @override
-  String get designation;
+  String? get designation;
   @override
-  String get email;
+  String? get email;
   @override
   String? get phone;
   @override

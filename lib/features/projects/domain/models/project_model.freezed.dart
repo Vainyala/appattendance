@@ -34,23 +34,25 @@ mixin _$ProjectModel {
   String? get projectDescription => throw _privateConstructorUsedError;
   String? get projectTechstack => throw _privateConstructorUsedError;
   String? get projectAssignedDate => throw _privateConstructorUsedError;
-  String? get estdStartDate =>
-      throw _privateConstructorUsedError; // ← New field from dummy
-  String? get estdEndDate =>
-      throw _privateConstructorUsedError; // ← New field from dummy
-  String? get estdEffort =>
-      throw _privateConstructorUsedError; // ← New field from dummy
-  String? get estdCost =>
-      throw _privateConstructorUsedError; // ← New field from dummy
+  String? get estdStartDate => throw _privateConstructorUsedError;
+  String? get estdEndDate => throw _privateConstructorUsedError;
+  String? get estdEffort => throw _privateConstructorUsedError;
+  String? get estdCost => throw _privateConstructorUsedError;
   ProjectStatus get status => throw _privateConstructorUsedError;
   ProjectPriority get priority => throw _privateConstructorUsedError;
-  double get progress => throw _privateConstructorUsedError;
-  int get teamSize => throw _privateConstructorUsedError;
-  int get totalTasks => throw _privateConstructorUsedError;
-  int get completedTasks => throw _privateConstructorUsedError;
-  int get daysLeft => throw _privateConstructorUsedError;
-  List<String> get teamMemberIds => throw _privateConstructorUsedError;
-  List<String> get teamMemberNames => throw _privateConstructorUsedError;
+  double get progress => throw _privateConstructorUsedError; // 0.0 to 100.0
+  int get teamSize => throw _privateConstructorUsedError; // ← From analytics
+  int get totalTasks => throw _privateConstructorUsedError; // ← From analytics
+  int get completedTasks =>
+      throw _privateConstructorUsedError; // ← From analytics
+  int get daysLeft => throw _privateConstructorUsedError; // ← From analytics
+  List<String> get teamMemberIds =>
+      throw _privateConstructorUsedError; // empIds
+  List<String> get teamMemberNames =>
+      throw _privateConstructorUsedError; // Names (manager view ke liye)
+  // Replace old teamMemberNames/teamMemberIds
+  List<TeamMemberAnalytics> get teamMembers =>
+      throw _privateConstructorUsedError;
   DateTime? get startDate => throw _privateConstructorUsedError;
   DateTime? get endDate => throw _privateConstructorUsedError;
   DateTime? get createdAt => throw _privateConstructorUsedError;
@@ -100,6 +102,7 @@ abstract class $ProjectModelCopyWith<$Res> {
     int daysLeft,
     List<String> teamMemberIds,
     List<String> teamMemberNames,
+    List<TeamMemberAnalytics> teamMembers,
     DateTime? startDate,
     DateTime? endDate,
     DateTime? createdAt,
@@ -148,6 +151,7 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
     Object? daysLeft = null,
     Object? teamMemberIds = null,
     Object? teamMemberNames = null,
+    Object? teamMembers = null,
     Object? startDate = freezed,
     Object? endDate = freezed,
     Object? createdAt = freezed,
@@ -259,6 +263,10 @@ class _$ProjectModelCopyWithImpl<$Res, $Val extends ProjectModel>
                 ? _value.teamMemberNames
                 : teamMemberNames // ignore: cast_nullable_to_non_nullable
                       as List<String>,
+            teamMembers: null == teamMembers
+                ? _value.teamMembers
+                : teamMembers // ignore: cast_nullable_to_non_nullable
+                      as List<TeamMemberAnalytics>,
             startDate: freezed == startDate
                 ? _value.startDate
                 : startDate // ignore: cast_nullable_to_non_nullable
@@ -317,6 +325,7 @@ abstract class _$$ProjectModelImplCopyWith<$Res>
     int daysLeft,
     List<String> teamMemberIds,
     List<String> teamMemberNames,
+    List<TeamMemberAnalytics> teamMembers,
     DateTime? startDate,
     DateTime? endDate,
     DateTime? createdAt,
@@ -364,6 +373,7 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
     Object? daysLeft = null,
     Object? teamMemberIds = null,
     Object? teamMemberNames = null,
+    Object? teamMembers = null,
     Object? startDate = freezed,
     Object? endDate = freezed,
     Object? createdAt = freezed,
@@ -475,6 +485,10 @@ class __$$ProjectModelImplCopyWithImpl<$Res>
             ? _value._teamMemberNames
             : teamMemberNames // ignore: cast_nullable_to_non_nullable
                   as List<String>,
+        teamMembers: null == teamMembers
+            ? _value._teamMembers
+            : teamMembers // ignore: cast_nullable_to_non_nullable
+                  as List<TeamMemberAnalytics>,
         startDate: freezed == startDate
             ? _value.startDate
             : startDate // ignore: cast_nullable_to_non_nullable
@@ -526,12 +540,14 @@ class _$ProjectModelImpl extends _ProjectModel {
     this.daysLeft = 0,
     final List<String> teamMemberIds = const [],
     final List<String> teamMemberNames = const [],
+    final List<TeamMemberAnalytics> teamMembers = const [],
     this.startDate,
     this.endDate,
     this.createdAt,
     this.updatedAt,
   }) : _teamMemberIds = teamMemberIds,
        _teamMemberNames = teamMemberNames,
+       _teamMembers = teamMembers,
        super._();
 
   factory _$ProjectModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -565,16 +581,12 @@ class _$ProjectModelImpl extends _ProjectModel {
   final String? projectAssignedDate;
   @override
   final String? estdStartDate;
-  // ← New field from dummy
   @override
   final String? estdEndDate;
-  // ← New field from dummy
   @override
   final String? estdEffort;
-  // ← New field from dummy
   @override
   final String? estdCost;
-  // ← New field from dummy
   @override
   @JsonKey()
   final ProjectStatus status;
@@ -584,19 +596,25 @@ class _$ProjectModelImpl extends _ProjectModel {
   @override
   @JsonKey()
   final double progress;
+  // 0.0 to 100.0
   @override
   @JsonKey()
   final int teamSize;
+  // ← From analytics
   @override
   @JsonKey()
   final int totalTasks;
+  // ← From analytics
   @override
   @JsonKey()
   final int completedTasks;
+  // ← From analytics
   @override
   @JsonKey()
   final int daysLeft;
+  // ← From analytics
   final List<String> _teamMemberIds;
+  // ← From analytics
   @override
   @JsonKey()
   List<String> get teamMemberIds {
@@ -605,13 +623,28 @@ class _$ProjectModelImpl extends _ProjectModel {
     return EqualUnmodifiableListView(_teamMemberIds);
   }
 
+  // empIds
   final List<String> _teamMemberNames;
+  // empIds
   @override
   @JsonKey()
   List<String> get teamMemberNames {
     if (_teamMemberNames is EqualUnmodifiableListView) return _teamMemberNames;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_teamMemberNames);
+  }
+
+  // Names (manager view ke liye)
+  // Replace old teamMemberNames/teamMemberIds
+  final List<TeamMemberAnalytics> _teamMembers;
+  // Names (manager view ke liye)
+  // Replace old teamMemberNames/teamMemberIds
+  @override
+  @JsonKey()
+  List<TeamMemberAnalytics> get teamMembers {
+    if (_teamMembers is EqualUnmodifiableListView) return _teamMembers;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_teamMembers);
   }
 
   @override
@@ -625,7 +658,7 @@ class _$ProjectModelImpl extends _ProjectModel {
 
   @override
   String toString() {
-    return 'ProjectModel(projectId: $projectId, orgShortName: $orgShortName, projectName: $projectName, projectSite: $projectSite, clientName: $clientName, clientLocation: $clientLocation, clientContact: $clientContact, mngName: $mngName, mngEmail: $mngEmail, mngContact: $mngContact, projectDescription: $projectDescription, projectTechstack: $projectTechstack, projectAssignedDate: $projectAssignedDate, estdStartDate: $estdStartDate, estdEndDate: $estdEndDate, estdEffort: $estdEffort, estdCost: $estdCost, status: $status, priority: $priority, progress: $progress, teamSize: $teamSize, totalTasks: $totalTasks, completedTasks: $completedTasks, daysLeft: $daysLeft, teamMemberIds: $teamMemberIds, teamMemberNames: $teamMemberNames, startDate: $startDate, endDate: $endDate, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'ProjectModel(projectId: $projectId, orgShortName: $orgShortName, projectName: $projectName, projectSite: $projectSite, clientName: $clientName, clientLocation: $clientLocation, clientContact: $clientContact, mngName: $mngName, mngEmail: $mngEmail, mngContact: $mngContact, projectDescription: $projectDescription, projectTechstack: $projectTechstack, projectAssignedDate: $projectAssignedDate, estdStartDate: $estdStartDate, estdEndDate: $estdEndDate, estdEffort: $estdEffort, estdCost: $estdCost, status: $status, priority: $priority, progress: $progress, teamSize: $teamSize, totalTasks: $totalTasks, completedTasks: $completedTasks, daysLeft: $daysLeft, teamMemberIds: $teamMemberIds, teamMemberNames: $teamMemberNames, teamMembers: $teamMembers, startDate: $startDate, endDate: $endDate, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -687,6 +720,10 @@ class _$ProjectModelImpl extends _ProjectModel {
               other._teamMemberNames,
               _teamMemberNames,
             ) &&
+            const DeepCollectionEquality().equals(
+              other._teamMembers,
+              _teamMembers,
+            ) &&
             (identical(other.startDate, startDate) ||
                 other.startDate == startDate) &&
             (identical(other.endDate, endDate) || other.endDate == endDate) &&
@@ -726,6 +763,7 @@ class _$ProjectModelImpl extends _ProjectModel {
     daysLeft,
     const DeepCollectionEquality().hash(_teamMemberIds),
     const DeepCollectionEquality().hash(_teamMemberNames),
+    const DeepCollectionEquality().hash(_teamMembers),
     startDate,
     endDate,
     createdAt,
@@ -774,6 +812,7 @@ abstract class _ProjectModel extends ProjectModel {
     final int daysLeft,
     final List<String> teamMemberIds,
     final List<String> teamMemberNames,
+    final List<TeamMemberAnalytics> teamMembers,
     final DateTime? startDate,
     final DateTime? endDate,
     final DateTime? createdAt,
@@ -811,31 +850,34 @@ abstract class _ProjectModel extends ProjectModel {
   @override
   String? get projectAssignedDate;
   @override
-  String? get estdStartDate; // ← New field from dummy
+  String? get estdStartDate;
   @override
-  String? get estdEndDate; // ← New field from dummy
+  String? get estdEndDate;
   @override
-  String? get estdEffort; // ← New field from dummy
+  String? get estdEffort;
   @override
-  String? get estdCost; // ← New field from dummy
+  String? get estdCost;
   @override
   ProjectStatus get status;
   @override
   ProjectPriority get priority;
   @override
-  double get progress;
+  double get progress; // 0.0 to 100.0
   @override
-  int get teamSize;
+  int get teamSize; // ← From analytics
   @override
-  int get totalTasks;
+  int get totalTasks; // ← From analytics
   @override
-  int get completedTasks;
+  int get completedTasks; // ← From analytics
   @override
-  int get daysLeft;
+  int get daysLeft; // ← From analytics
   @override
-  List<String> get teamMemberIds;
+  List<String> get teamMemberIds; // empIds
   @override
-  List<String> get teamMemberNames;
+  List<String> get teamMemberNames; // Names (manager view ke liye)
+  // Replace old teamMemberNames/teamMemberIds
+  @override
+  List<TeamMemberAnalytics> get teamMembers;
   @override
   DateTime? get startDate;
   @override

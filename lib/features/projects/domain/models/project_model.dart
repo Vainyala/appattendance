@@ -1,9 +1,10 @@
 // lib/features/projects/domain/models/project_model.dart
-// FINAL PRODUCTION-READY VERSION - January 07, 2026
-// Fully aligned with latest dummy data & project_master table
-// Added: estd_start_date, estd_end_date, estd_effort, estd_cost
-// Null-safe, role-based helpers, no hardcoding
+// FINAL MERGED & UPGRADED VERSION - January 07, 2026
+// ProjectModel now covers both core project data + analytics fields (teamSize, totalTasks, daysLeft, progress, teamMembers)
+// No need for separate ProjectAnalytics - one model for everything
+// Null-safe, role-based helpers, aligned with latest dummy data & table
 
+import 'package:appattendance/features/team/domain/models/team_model.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -32,19 +33,21 @@ class ProjectModel with _$ProjectModel {
     String? projectDescription,
     String? projectTechstack,
     String? projectAssignedDate,
-    String? estdStartDate, // ← New field from dummy
-    String? estdEndDate, // ← New field from dummy
-    String? estdEffort, // ← New field from dummy
-    String? estdCost, // ← New field from dummy
+    String? estdStartDate,
+    String? estdEndDate,
+    String? estdEffort,
+    String? estdCost,
     @Default(ProjectStatus.active) ProjectStatus status,
     @Default(ProjectPriority.high) ProjectPriority priority,
-    @Default(0.0) double progress,
-    @Default(0) int teamSize,
-    @Default(0) int totalTasks,
-    @Default(0) int completedTasks,
-    @Default(0) int daysLeft,
-    @Default([]) List<String> teamMemberIds,
-    @Default([]) List<String> teamMemberNames,
+    @Default(0.0) double progress, // 0.0 to 100.0
+    @Default(0) int teamSize, // ← From analytics
+    @Default(0) int totalTasks, // ← From analytics
+    @Default(0) int completedTasks, // ← From analytics
+    @Default(0) int daysLeft, // ← From analytics
+    // @Default([]) List<String> teamMemberIds, // empIds
+    // @Default([]) List<String> teamMemberNames, // Names (manager view ke liye)
+    // Replace old teamMemberNames/teamMemberIds
+    @Default([]) List<TeamMemberAnalytics> teamMembers,
     DateTime? startDate,
     DateTime? endDate,
     DateTime? createdAt,
@@ -100,7 +103,7 @@ extension ProjectModelExtension on ProjectModel {
   }
 }
 
-// DB Factory (null-safe, aligned with latest table + dummy data)
+// DB Factory (null-safe, fully aligned with latest table + dummy data)
 ProjectModel projectFromDB(Map<String, dynamic> row) {
   return ProjectModel(
     projectId: row['project_id'] as String? ?? '',
@@ -116,19 +119,19 @@ ProjectModel projectFromDB(Map<String, dynamic> row) {
     projectDescription: row['project_description'] as String?,
     projectTechstack: row['project_techstack'] as String?,
     projectAssignedDate: row['project_assigned_date'] as String?,
-    estdStartDate: row['estd_start_date'] as String?, // ← New field
-    estdEndDate: row['estd_end_date'] as String?, // ← New field
-    estdEffort: row['estd_effort'] as String?, // ← New field
-    estdCost: row['estd_cost'] as String?, // ← New field
-    status: _mapProjectStatus(row['project_status'] as String? ?? 'active'),
-    priority: _mapProjectPriority(row['project_priority'] as String? ?? 'HIGH'),
+    estdStartDate: row['estd_start_date'] as String?,
+    estdEndDate: row['estd_end_date'] as String?,
+    estdEffort: row['estd_effort'] as String?,
+    estdCost: row['estd_cost'] as String?,
+    status: _mapProjectStatus(row['status'] as String? ?? 'active'),
+    priority: _mapProjectPriority(row['priority'] as String? ?? 'HIGH'),
     progress: (row['progress'] as num?)?.toDouble() ?? 0.0,
     teamSize: row['team_size'] as int? ?? 0,
     totalTasks: row['total_tasks'] as int? ?? 0,
     completedTasks: row['completed_tasks'] as int? ?? 0,
     daysLeft: row['days_left'] as int? ?? 0,
-    teamMemberIds: [], // Populate from join query
-    teamMemberNames: [], // Populate from join query
+    // teamMemberIds: [], // Populate from join query
+    // teamMemberNames: [], // Populate from join query
     startDate: _parseDate(row['start_date'] as String?),
     endDate: _parseDate(row['end_date'] as String?),
     createdAt: _parseDate(row['created_at'] as String?),
